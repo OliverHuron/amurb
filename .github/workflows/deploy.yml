@@ -1,0 +1,62 @@
+name: Despliegue producción (amurb.siafsystem.online)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-amurb
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, amurb]
+    env:
+      APP_DIR: /var/www/amurb
+      PORT: 5011
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+
+      # Astro 7 requiere Node >= 22.12; se instala en el tool cache del runner sin tocar el Node del sistema.
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sincronizar al directorio de la app
+        run: |
+          rsync -a --delete \
+            --exclude '.git' --exclude 'node_modules' --exclude 'dist' \
+            --exclude '.env' --exclude 'blender' --exclude 'desktop_frames' \
+            ./ "$APP_DIR/"
+
+      - name: Instalar dependencias y compilar
+        working-directory: /var/www/amurb
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Arrancar o recargar con PM2
+        working-directory: /var/www/amurb
+        run: |
+          export AMURB_NODE="$(which node)"
+          if pm2 describe amurb > /dev/null 2>&1; then
+            pm2 delete amurb
+          fi
+          pm2 start ecosystem.config.cjs --update-env
+          pm2 save
+
+      - name: Verificar que responde
+        run: |
+          for i in $(seq 1 15); do
+            if curl -fsS -o /dev/null "http://127.0.0.1:${PORT}/"; then
+              echo "amurb responde en :${PORT}"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "amurb no respondió en :${PORT}"
+          pm2 logs amurb --lines 40 --nostream || true
+          exit 1

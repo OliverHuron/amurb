@@ -1,0 +1,295 @@
+---
+// Hero con secuencia de imágenes controlada por el scroll (GSAP + ScrollTrigger).
+// Los frames se generan con `npm run assets` en public/frames/{desktop,mobile}.
+import { empresa } from '../data/empresa';
+
+const FRAMES = {
+  desktop: { ruta: '/frames/desktop/', total: 180 },
+  mobile: { ruta: '/frames/mobile/', total: 90 },
+};
+const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
+---
+
+<section
+  id="inicio"
+  data-hero
+  data-ruta-desktop={FRAMES.desktop.ruta}
+  data-total-desktop={FRAMES.desktop.total}
+  data-ruta-mobile={FRAMES.mobile.ruta}
+  data-total-mobile={FRAMES.mobile.total}
+  aria-label="Presentación"
+  class="relative h-[420vh]"
+>
+  <div class="sticky top-0 h-svh overflow-hidden">
+    <!-- Póster: se ve al instante y mientras cargan los frames -->
+    <picture>
+      <source media="(max-aspect-ratio: 3/4)" srcset={primerFrame(FRAMES.mobile.ruta)} />
+      <img
+        data-hero-poster
+        src={primerFrame(FRAMES.desktop.ruta)}
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+        class="absolute inset-0 size-full object-cover transition-opacity duration-700"
+      />
+    </picture>
+    <canvas data-hero-canvas aria-hidden="true" class="absolute inset-0 size-full"></canvas>
+
+    <!-- Capas de legibilidad -->
+    <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-noche via-noche/20 to-transparent"></div>
+    <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-r from-noche/80 via-noche/25 to-transparent"></div>
+
+    <div class="relative z-10 mx-auto flex h-full max-w-7xl items-end px-5 pb-[14vh] sm:px-8">
+      <div class="relative w-full max-w-3xl">
+        <!-- Bloque 1 -->
+        <div data-beat="1" class="hero-beat">
+          <p class="mb-5 font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase sm:text-sm">
+            <span class="linea"><span>{empresa.nombreCompleto}</span></span>
+          </p>
+          <h1 class="font-display text-[clamp(2.6rem,7vw,5.75rem)] leading-[1.02] font-bold tracking-tight text-balance">
+            <span class="linea"><span>Soluciones</span></span>
+            <span class="linea"><span><em class="texto-luz not-italic">innovadoras</em></span></span>
+          </h1>
+          <p class="mt-6 max-w-xl text-base text-white/75 sm:text-lg">
+            <span class="linea"><span>{empresa.bajada}</span></span>
+          </p>
+        </div>
+
+        <!-- Bloque 2 -->
+        <div data-beat="2" class="hero-beat hero-beat-siguiente absolute inset-x-0 bottom-0">
+          <p class="mb-5 font-display text-xs font-semibold tracking-[0.35em] text-verde-luz uppercase sm:text-sm">
+            <span class="linea"><span>Infraestructura inteligente</span></span>
+          </p>
+          <h2 class="font-display text-[clamp(2.4rem,6.2vw,5rem)] leading-[1.04] font-bold tracking-tight text-balance">
+            <span class="linea"><span>Ciudades más seguras</span></span>
+            <span class="linea"><span>y <em class="texto-luz not-italic">sostenibles.</em></span></span>
+          </h2>
+          <p class="mt-6 max-w-xl text-base text-white/75 sm:text-lg">
+            <span class="linea"><span>Alumbrado, energía, CCTV y materiales para los proyectos estratégicos del país.</span></span>
+          </p>
+        </div>
+
+        <!-- Bloque 3 -->
+        <div data-beat="3" class="hero-beat hero-beat-siguiente absolute inset-x-0 bottom-0">
+          <p class="mb-5 font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase sm:text-sm">
+            <span class="linea"><span>SEDENA · Dependencias federales</span></span>
+          </p>
+          <h2 class="font-display text-[clamp(2.4rem,6.2vw,5rem)] leading-[1.04] font-bold tracking-tight text-balance">
+            <span class="linea"><span>Suministro estratégico</span></span>
+            <span class="linea"><span>para <em class="texto-luz not-italic">México.</em></span></span>
+          </h2>
+          <p class="mt-6 max-w-xl text-base text-white/75 sm:text-lg">
+            <span class="linea"><span>{empresa.quienesSomos}</span></span>
+          </p>
+          <div class="linea mt-6 pt-2 pb-4">
+            <div class="flex flex-wrap gap-3">
+              <a
+                href="#soluciones"
+                class="rounded-full bg-ambar px-6 py-3 text-sm font-semibold whitespace-nowrap text-noche transition hover:bg-white"
+              >
+                Conoce nuestras soluciones
+              </a>
+              <a
+                href="#contacto"
+                class="rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold whitespace-nowrap backdrop-blur transition hover:border-white/60 hover:bg-white/10"
+              >
+                Contáctanos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progreso del recorrido -->
+    <div aria-hidden="true" class="absolute top-1/2 right-5 z-10 hidden -translate-y-1/2 items-center gap-4 sm:right-8 md:flex">
+      <ol class="flex flex-col gap-6 font-display text-xs font-semibold tracking-widest text-white/35">
+        <li data-indicador="1" class="transition-colors duration-300 data-[activo=true]:text-white" data-activo="true">01</li>
+        <li data-indicador="2" class="transition-colors duration-300 data-[activo=true]:text-white">02</li>
+        <li data-indicador="3" class="transition-colors duration-300 data-[activo=true]:text-white">03</li>
+      </ol>
+      <div class="h-40 w-px overflow-hidden bg-white/15">
+        <div data-hero-barra class="h-full w-full origin-top scale-y-0 bg-gradient-to-b from-ambar to-verde-luz"></div>
+      </div>
+    </div>
+
+    <!-- Indicación de scroll -->
+    <div data-hero-cue aria-hidden="true" class="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[0.65rem] font-semibold tracking-[0.3em] text-white/60 uppercase">
+      Desliza
+      <span class="relative block h-10 w-px overflow-hidden bg-white/20">
+        <span class="cue-gota absolute inset-x-0 top-0 h-3 bg-ambar"></span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .linea {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+  /* Solo los <span> de texto: una regla general pisaría utilidades como `flex` */
+  .linea > :global(span) {
+    display: block;
+  }
+  .linea > :global(*) {
+    will-change: transform;
+  }
+  .texto-luz {
+    background: linear-gradient(90deg, var(--color-ambar), #fff1d6 50%, var(--color-verde-luz));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Antes de que GSAP tome el control, los bloques 2 y 3 no se muestran */
+  .hero-beat-siguiente {
+    visibility: hidden;
+  }
+  .cue-gota {
+    animation: gota 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  @keyframes gota {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(350%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cue-gota {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]')!;
+  const canvas = hero.querySelector<HTMLCanvasElement>('[data-hero-canvas]')!;
+  const poster = hero.querySelector<HTMLImageElement>('[data-hero-poster]')!;
+  const ctx = canvas.getContext('2d')!;
+
+  const movimientoReducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esVertical = matchMedia('(max-aspect-ratio: 3/4)').matches;
+  const ruta = esVertical ? hero.dataset.rutaMobile! : hero.dataset.rutaDesktop!;
+  const total = Number(esVertical ? hero.dataset.totalMobile : hero.dataset.totalDesktop);
+  const urlFrame = (i: number) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`;
+
+  // ---------- Secuencia de frames ----------
+  const frames: (HTMLImageElement | undefined)[] = new Array(total);
+  let frameActual = 0;
+
+  function frameDisponible(i: number) {
+    for (let d = 0; d < total; d++) {
+      if (frames[i - d]) return frames[i - d];
+      if (frames[i + d]) return frames[i + d];
+    }
+    return undefined;
+  }
+
+  function dibujar(i: number) {
+    frameActual = i;
+    const img = frameDisponible(i);
+    if (!img) return;
+    const { width: cw, height: ch } = canvas;
+    const escala = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * escala;
+    const h = img.naturalHeight * escala;
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+  }
+
+  function ajustarCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(canvas.clientWidth * dpr);
+    canvas.height = Math.round(canvas.clientHeight * dpr);
+    ctx.imageSmoothingQuality = 'high';
+    dibujar(frameActual);
+  }
+
+  async function cargarFrame(i: number) {
+    if (frames[i]) return;
+    const img = new Image();
+    img.src = urlFrame(i);
+    try {
+      await img.decode();
+      frames[i] = img;
+      if (i === frameActual || Math.abs(i - frameActual) < 3) dibujar(frameActual);
+    } catch {
+      /* frame faltante: se usa el más cercano disponible */
+    }
+  }
+
+  // Orden de carga: primer frame, luego uno de cada 10 (cobertura rápida) y después el resto.
+  async function cargarSecuencia() {
+    await cargarFrame(0);
+    poster.style.opacity = '0';
+    const orden: number[] = [];
+    for (let i = 10; i < total; i += 10) orden.push(i);
+    for (let i = 1; i < total; i++) if (i % 10 !== 0) orden.push(i);
+    const CONCURRENCIA = 6;
+    let siguiente = 0;
+    const trabajador = async () => {
+      while (siguiente < orden.length) await cargarFrame(orden[siguiente++]);
+    };
+    await Promise.all(Array.from({ length: CONCURRENCIA }, trabajador));
+  }
+
+  ajustarCanvas();
+  window.addEventListener('resize', ajustarCanvas);
+  cargarSecuencia();
+
+  // ---------- Texto y scroll ----------
+  const beats = gsap.utils.toArray<HTMLElement>('[data-beat]', hero);
+  const lineas = beats.map((b) => gsap.utils.toArray<HTMLElement>('.linea > *', b));
+  const indicadores = gsap.utils.toArray<HTMLElement>('[data-indicador]', hero);
+
+  const salida = movimientoReducido
+    ? { autoAlpha: 0, duration: 0.06 }
+    : { autoAlpha: 0, y: -50, filter: 'blur(8px)', duration: 0.08, ease: 'power2.in' };
+
+  function entradaLineas(tl: gsap.core.Timeline, i: number, en: number) {
+    if (movimientoReducido) {
+      tl.fromTo(beats[i], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, en);
+    } else {
+      tl.set(beats[i], { autoAlpha: 1 }, en);
+      tl.fromTo(lineas[i], { yPercent: 115 }, { yPercent: 0, stagger: 0.012, duration: 0.07, ease: 'power3.out' }, en);
+    }
+  }
+
+  // Entrada del bloque 1 al cargar la página
+  if (!movimientoReducido) {
+    gsap.from(lineas[0], { yPercent: 115, duration: 1.1, stagger: 0.09, ease: 'power4.out', delay: 0.2 });
+  }
+  gsap.set(beats.slice(1), { autoAlpha: 0 });
+
+  const estado = { frame: 0 };
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: hero,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.6,
+      onUpdate: ({ progress }) => {
+        const activo = progress < 0.32 ? 0 : progress < 0.66 ? 1 : 2;
+        indicadores.forEach((el, i) => (el.dataset.activo = String(i === activo)));
+      },
+    },
+  });
+
+  tl.to(estado, { frame: total - 1, duration: 1, onUpdate: () => dibujar(Math.round(estado.frame)) }, 0)
+    .fromTo('[data-hero-barra]', { scaleY: 0 }, { scaleY: 1, duration: 1 }, 0)
+    .to('[data-hero-cue]', { autoAlpha: 0, duration: 0.04 }, 0.02)
+    .to(beats[0], salida, 0.22);
+  entradaLineas(tl, 1, 0.34);
+  tl.to(beats[1], salida, 0.6);
+  entradaLineas(tl, 2, 0.7);
+
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+</script>

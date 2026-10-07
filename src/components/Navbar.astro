@@ -1,0 +1,170 @@
+---
+import { contacto, navegacion as enlaces } from '../data/empresa';
+---
+
+<header
+  id="navbar"
+  data-scrolled="false"
+  class="group/nav fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500 data-[scrolled=true]:border-b data-[scrolled=true]:border-white/10 data-[scrolled=true]:bg-noche-900/70 data-[scrolled=true]:backdrop-blur-xl"
+>
+  <!-- Degradado de lectura mientras la barra es transparente -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-500 group-data-[scrolled=true]/nav:opacity-0"
+  >
+  </div>
+
+  <nav
+    aria-label="Principal"
+    class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 transition-[height] duration-500 group-data-[scrolled=true]/nav:h-16 sm:px-8"
+  >
+    <a href="/" class="relative z-10 flex shrink-0 items-center" aria-label="AmUrb, ir al inicio">
+      <img
+        src="/brand/logo-claro.webp"
+        alt="AmUrb, Ambiental y Urbanística de Michoacán"
+        width="593"
+        height="210"
+        class="h-11 w-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] transition-[height] duration-500 group-data-[scrolled=true]/nav:h-10 sm:h-14"
+        decoding="async"
+      />
+    </a>
+
+    <ul class="hidden items-center gap-1 lg:flex">
+      {
+        enlaces.map(({ href, texto }) => (
+          <li>
+            <a
+              href={href}
+              class="group/link relative rounded-full px-4 py-2 text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-white"
+            >
+              {texto}
+              <span
+                aria-hidden="true"
+                class="absolute inset-x-4 -bottom-0.5 h-px origin-left scale-x-0 bg-gradient-to-r from-ambar to-verde-luz transition-transform duration-300 group-hover/link:scale-x-100"
+              />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex items-center gap-3">
+      <a
+        href={contacto.telefonoHref}
+        class="hidden items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-white xl:inline-flex"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-4 fill-none stroke-current stroke-[1.8]">
+          <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+        </svg>
+        {contacto.telefono}
+      </a>
+      <a
+        href="#contacto"
+        class="hidden rounded-full border border-ambar/50 bg-ambar/10 px-5 py-2 text-sm font-semibold text-ambar shadow-[0_0_24px_-6px] shadow-ambar/60 transition hover:bg-ambar hover:text-noche sm:inline-flex"
+      >
+        Contáctanos
+      </a>
+
+      <button
+        id="menu-boton"
+        type="button"
+        class="relative z-10 inline-flex size-11 items-center justify-center rounded-full border border-white/15 bg-white/5 backdrop-blur lg:hidden"
+        aria-controls="menu-movil"
+        aria-expanded="false"
+        aria-label="Abrir menú"
+      >
+        <span aria-hidden="true" class="relative block h-3 w-5">
+          <span class="menu-linea absolute inset-x-0 top-0 h-0.5 rounded bg-white transition-transform duration-300"></span>
+          <span class="menu-linea absolute inset-x-0 bottom-0 h-0.5 rounded bg-white transition-transform duration-300"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- Menú móvil: fuera del header porque su backdrop-filter confinaría un hijo `fixed` -->
+<div
+  id="menu-movil"
+  hidden
+  class="fixed inset-0 z-40 bg-noche/95 backdrop-blur-2xl lg:hidden"
+>
+  <a
+    href={contacto.telefonoHref}
+    class="absolute inset-x-8 bottom-10 flex items-center gap-3 border-t border-white/10 pt-6 text-base text-white/70"
+  >
+    <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-ambar stroke-[1.8]">
+      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+    </svg>
+    {contacto.telefono}
+  </a>
+  <ul class="flex h-full flex-col justify-center gap-2 px-8">
+    {
+      [...enlaces, { href: '#contacto', texto: 'Contacto' }].map(({ href, texto }, i) => (
+        <li>
+          <a
+            href={href}
+            class="menu-enlace block py-3 font-display text-3xl font-semibold text-white/90 hover:text-ambar"
+            style={`--retraso:${i * 60}ms`}
+          >
+            {texto}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  #menu-boton[aria-expanded='true'] .menu-linea:first-child {
+    transform: translateY(5px) rotate(45deg);
+  }
+  #menu-boton[aria-expanded='true'] .menu-linea:last-child {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+  #menu-movil:not([hidden]) .menu-enlace {
+    animation: entrar 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--retraso);
+  }
+  @keyframes entrar {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #menu-movil:not([hidden]) .menu-enlace {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const navbar = document.getElementById('navbar')!;
+  const boton = document.getElementById('menu-boton')!;
+  const menu = document.getElementById('menu-movil')!;
+
+  const actualizarFondo = () => {
+    navbar.dataset.scrolled = String(window.scrollY > 40);
+  };
+  actualizarFondo();
+  window.addEventListener('scroll', actualizarFondo, { passive: true });
+
+  const alternarMenu = (abrir: boolean) => {
+    boton.setAttribute('aria-expanded', String(abrir));
+    boton.setAttribute('aria-label', abrir ? 'Cerrar menú' : 'Abrir menú');
+    menu.hidden = !abrir;
+    document.documentElement.style.overflow = abrir ? 'hidden' : '';
+    if (abrir) menu.querySelector('a')?.focus();
+  };
+
+  boton.addEventListener('click', () => alternarMenu(boton.getAttribute('aria-expanded') !== 'true'));
+  menu.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) alternarMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.hidden) {
+      alternarMenu(false);
+      boton.focus();
+    }
+  });
+</script>

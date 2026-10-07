@@ -1,0 +1,23 @@
+# dependencias y build
+node_modules/
+dist/
+.astro/
+
+# originales pesados (279 MB): los assets web se generan con `npm run assets`
+desktop_frames/
+
+# entorno
+.env
+.env.*
+!.env.example
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# texturas descargadas y renders de Blender (regenerables)
+blender/texturas/
+blender/render/
+blender/*.blend
+*.blend1

@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/montserrat';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Montserrat Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-noche: #070b14;
+  --color-noche-900: #0b1220;
+  /* Paleta AmUrb: verdes y gris del logo + ámbar de la luminaria */
+  --color-ambar: #ffc46b;
+  --color-verde: #5f8f45;
+  --color-verde-luz: #9fd36b;
+  --color-gris-urbano: #4a4d52;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-noche);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-verde-luz);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
