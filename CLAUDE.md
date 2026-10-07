@@ -77,6 +77,14 @@ Contexto del proyecto para Claude. Idioma de trabajo: **español**.
   5. **Tiempo real:** exportar a glTF para three.js con cámara ortográfica y OrbitControls. Los shaders procedurales (vidrio con parteluces, variación por objeto) no se exportan a glTF: habrá que hornearlos a texturas o reimplementarlos. Luz: hornear AO o lightmaps, o usar sombras en tiempo real con HDRI.
 - **Spline:** la escena de Spline (sección siguiente) queda como **antecedente**; el campus definitivo es el de Blender. No borrarla sin preguntar.
 
+## Producción (en línea desde 2026-10-07)
+
+- **URL:** https://amurb.siafsystem.online · **Repo:** `github.com/OliverHuron/amurb` (rama `main`).
+- **Servidor:** `ssh oliver@100.100.81.42` (Tailscale; host `infraestructura`). Acceso con llave y `sudo` sin contraseña.
+- **Desplegar:** `git push origin main` → runner `infra-amurb` (label `amurb`) → Node 22 vía `setup-node` (el sistema tiene Node 20) → build → PM2 `amurb` en el **puerto 5011**.
+- **Detalles completos:** [DEPLOY-AMURB.md](DEPLOY-AMURB.md).
+- **Token de GitHub:** no se guarda en el repo ni en la configuración de Git. El push se hace con `http.extraHeader` temporal o con la credencial del usuario.
+
 ## Infraestructura (autohospedada)
 
 - **NGINX:** proxy inverso delante de la app Node.
