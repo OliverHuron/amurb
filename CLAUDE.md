@@ -139,16 +139,19 @@ Referencias de producto: fichas de bolardo 120-15-9.5, brocal con tapa ligera, p
   5. **Tiempo real:** exportar a glTF para three.js con cámara ortográfica y OrbitControls. Los shaders procedurales (vidrio con parteluces, variación por objeto) no se exportan a glTF: habrá que hornearlos a texturas o reimplementarlos. Luz: hornear AO o lightmaps, o usar sombras en tiempo real con HDRI.
 - **Spline:** la escena de Spline (sección siguiente) queda como **antecedente**; el campus definitivo es el de Blender. No borrarla sin preguntar.
 
-## MIGRACIÓN PENDIENTE (2026-10-08) — RETOMAR AQUÍ
+## PRODUCCIÓN ACTUAL (desde 2026-10-08): amurb.com.mx en VPS propio
 
-- **Nuevo servidor:** `root@2.25.200.198`. El usuario compartió la contraseña en el chat: **no guardarla**; instalar la llave `~/.ssh/id_ed25519` y recomendarle cambiar la contraseña y desactivar el acceso por contraseña.
-- **Nuevo dominio:** **amurb.com.mx**, en la misma cuenta de Cloudflare (NS `fatima`/`joaquin.ns.cloudflare.com`, proxy activo; hoy responde 200 con otro contenido).
-- **Nada se ha tocado todavía en el servidor nuevo.** El usuario dijo "exit" a media revisión.
-- **Pendiente:**
-  1. Preparar el servidor: Node 22, NGINX, PM2, runner y Cloudflare Tunnel o registro DNS.
-  2. Desplegar el sitio y los frames del recorrido (fuera de git).
-  3. Decidir qué pasa con `amurb.siafsystem.online`.
-  4. El código del recorrido y la fluidez aún **no tiene commit ni push**.
+- **Sitio:** **https://amurb.com.mx**; www redirige con 301. Servidor `amurb-vps`, acceso **solo** `ssh root@100.97.61.87` (Tailscale, llave). La IP pública tiene SSH y HTTP cerrados (`ufw`) y no hay contraseñas.
+- **Todo está en [DEPLOY-AMURB.md](DEPLOY-AMURB.md):** túnel de Cloudflare `amurb`, runner `amurb-vps`, PM2 `pm2-amurb` en el puerto 5011 y frames en `/var/www/amurb-media`.
+- **GitHub:** se usa `gh` CLI (sesión de OliverHuron con permisos `repo` y `workflow`); `gh auth setup-git` ya está configurado. No se usan tokens pegados.
+- **SEO hecho:**
+  - metadatos, Open Graph (`public/og.jpg`, generado con `scripts/generar-og.mjs`) y JSON-LD (Organization, LocalBusiness y WebSite);
+  - `robots.txt`, `sitemap.xml` y la clave de IndexNow (`public/0c4f….txt`), con la URL ya enviada (202);
+  - secciones con contenido real: `Nosotros.astro`, `Marcas.astro` y `Contacto.astro` con pie de página (unas 555 palabras indexables).
+- **Pendiente del usuario:**
+  1. Google Search Console: propiedad de dominio, TXT en Cloudflare, enviar el sitemap y pedir la indexación.
+  2. Google Business Profile.
+  3. Decidir si se retira `amurb.siafsystem.online` del servidor viejo (PM2 `amurb` y runner `infra-amurb`).
 
 ## Producción (en línea desde 2026-10-07)
 
