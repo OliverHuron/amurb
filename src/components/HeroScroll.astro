@@ -167,82 +167,22 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SecuenciaFrames } from '../lib/secuencia';
 
   gsap.registerPlugin(ScrollTrigger);
 
   const hero = document.querySelector<HTMLElement>('[data-hero]')!;
   const canvas = hero.querySelector<HTMLCanvasElement>('[data-hero-canvas]')!;
   const poster = hero.querySelector<HTMLImageElement>('[data-hero-poster]')!;
-  const ctx = canvas.getContext('2d')!;
 
   const movimientoReducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const esVertical = matchMedia('(max-aspect-ratio: 3/4)').matches;
   const ruta = esVertical ? hero.dataset.rutaMobile! : hero.dataset.rutaDesktop!;
   const total = Number(esVertical ? hero.dataset.totalMobile : hero.dataset.totalDesktop);
-  const urlFrame = (i: number) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`;
 
-  // ---------- Secuencia de frames ----------
-  const frames: (HTMLImageElement | undefined)[] = new Array(total);
-  let frameActual = 0;
-
-  function frameDisponible(i: number) {
-    for (let d = 0; d < total; d++) {
-      if (frames[i - d]) return frames[i - d];
-      if (frames[i + d]) return frames[i + d];
-    }
-    return undefined;
-  }
-
-  function dibujar(i: number) {
-    frameActual = i;
-    const img = frameDisponible(i);
-    if (!img) return;
-    const { width: cw, height: ch } = canvas;
-    const escala = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const w = img.naturalWidth * escala;
-    const h = img.naturalHeight * escala;
-    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
-  }
-
-  function ajustarCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = Math.round(canvas.clientWidth * dpr);
-    canvas.height = Math.round(canvas.clientHeight * dpr);
-    ctx.imageSmoothingQuality = 'high';
-    dibujar(frameActual);
-  }
-
-  async function cargarFrame(i: number) {
-    if (frames[i]) return;
-    const img = new Image();
-    img.src = urlFrame(i);
-    try {
-      await img.decode();
-      frames[i] = img;
-      if (i === frameActual || Math.abs(i - frameActual) < 3) dibujar(frameActual);
-    } catch {
-      /* frame faltante: se usa el más cercano disponible */
-    }
-  }
-
-  // Orden de carga: primer frame, luego uno de cada 10 (cobertura rápida) y después el resto.
-  async function cargarSecuencia() {
-    await cargarFrame(0);
-    poster.style.opacity = '0';
-    const orden: number[] = [];
-    for (let i = 10; i < total; i += 10) orden.push(i);
-    for (let i = 1; i < total; i++) if (i % 10 !== 0) orden.push(i);
-    const CONCURRENCIA = 6;
-    let siguiente = 0;
-    const trabajador = async () => {
-      while (siguiente < orden.length) await cargarFrame(orden[siguiente++]);
-    };
-    await Promise.all(Array.from({ length: CONCURRENCIA }, trabajador));
-  }
-
-  ajustarCanvas();
-  window.addEventListener('resize', ajustarCanvas);
-  cargarSecuencia();
+  // ---------- Secuencia de frames (con fundido entre frames) ----------
+  const secuencia = new SecuenciaFrames(canvas, (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`, total);
+  secuencia.cargar(10, 6, () => (poster.style.opacity = '0'));
 
   // ---------- Texto y scroll ----------
   const beats = gsap.utils.toArray<HTMLElement>('[data-beat]', hero);
@@ -283,7 +223,7 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
     },
   });
 
-  tl.to(estado, { frame: total - 1, duration: 1, onUpdate: () => dibujar(Math.round(estado.frame)) }, 0)
+  tl.to(estado, { frame: total - 1, duration: 1, onUpdate: () => secuencia.dibujar(estado.frame) }, 0)
     .fromTo('[data-hero-barra]', { scaleY: 0 }, { scaleY: 1, duration: 1 }, 0)
     .to('[data-hero-cue]', { autoAlpha: 0, duration: 0.04 }, 0.02)
     .to(beats[0], salida, 0.22);

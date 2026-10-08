@@ -67,5 +67,4 @@ export const navegacion = [
   { href: '#nosotros', texto: 'Nosotros' },
   { href: '#soluciones', texto: 'Soluciones' },
   { href: '#marcas', texto: 'Marcas' },
-  { href: '#campus', texto: 'Campus 3D' },
 ];

@@ -21,3 +21,11 @@ blender/texturas/
 blender/render/
 blender/*.blend
 *.blend1
+blender/modelos/
+
+# frames del recorrido (73 MB): se suben aparte al servidor, no van en git
+public/recorrido/
+
+# caché de Python
+__pycache__/
+*.pyc

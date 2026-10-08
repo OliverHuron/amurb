@@ -1,0 +1,149 @@
+---
+// Recorrido por la ciudad con los productos AmUrb aplicados (render de Blender, scroll con GSAP).
+import { RECORRIDO, paradas } from '../data/recorrido';
+---
+
+<section
+  id="soluciones"
+  data-recorrido
+  data-total={RECORRIDO.frames}
+  data-ruta-desktop={RECORRIDO.rutaDesktop}
+  data-ruta-mobile={RECORRIDO.rutaMobile}
+  aria-label="Soluciones aplicadas en la ciudad"
+  class="relative h-[950vh] bg-black"
+>
+  <div class="sticky top-0 h-svh overflow-hidden">
+    <canvas data-recorrido-canvas aria-hidden="true" class="absolute inset-0 size-full"></canvas>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 to-transparent"></div>
+
+    <!-- Tarjetas de cada escena: se activa la del rango de frames actual -->
+    <div class="absolute inset-x-0 bottom-0 z-10 mx-auto max-w-7xl px-5 pb-[9vh] sm:px-8">
+      <div class="relative h-[19rem] max-w-xl sm:h-[17rem]">
+        {
+          paradas.map((p) => (
+            <article
+              data-parada={p.id}
+              data-desde={p.desde}
+              data-hasta={p.hasta}
+              data-activo="false"
+              class="absolute inset-x-0 bottom-0 translate-y-6 rounded-2xl border border-white/10 bg-black/45 p-6 opacity-0 shadow-2xl backdrop-blur-xl transition-[opacity,translate] duration-500 ease-out data-[activo=true]:translate-y-0 data-[activo=true]:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-opacity sm:p-7"
+              aria-hidden="true"
+            >
+              <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">{p.etiqueta}</p>
+              <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-balance sm:text-4xl">{p.titulo}</h3>
+              <p class="mt-3 text-sm text-white/75 sm:text-base">{p.texto}</p>
+              {p.productos.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-2">
+                  {p.productos.map((nombre) => (
+                    <li class="rounded-full border border-verde-luz/30 bg-verde-luz/10 px-3 py-1 text-xs font-medium text-verde-luz">{nombre}</li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Índice de escenas -->
+    <nav aria-label="Escenas del recorrido" class="absolute top-1/2 right-5 z-10 hidden -translate-y-1/2 sm:right-8 lg:block">
+      <ol class="flex flex-col items-end gap-3">
+        {
+          paradas.slice(1, -1).map((p) => (
+            <li>
+              <button
+                type="button"
+                data-ir-a={p.id}
+                data-activo="false"
+                class="group flex items-center gap-3 text-xs font-semibold tracking-wider text-white/55 uppercase [text-shadow:0_1px_8px_rgb(0_0_0/0.9)] transition-colors hover:text-white data-[activo=true]:text-white"
+              >
+                {p.etiqueta}
+                <span class="block h-px w-5 bg-white/30 transition-all group-data-[activo=true]:w-10 group-data-[activo=true]:bg-ambar" />
+              </button>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="absolute inset-x-0 bottom-0 z-10 h-0.5 bg-white/10">
+      <div data-recorrido-barra class="h-full w-full origin-left scale-x-0 bg-gradient-to-r from-ambar to-verde-luz"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SecuenciaFrames } from '../lib/secuencia';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const seccion = document.querySelector<HTMLElement>('[data-recorrido]')!;
+  const canvas = seccion.querySelector<HTMLCanvasElement>('[data-recorrido-canvas]')!;
+  const barra = seccion.querySelector<HTMLElement>('[data-recorrido-barra]')!;
+  const tarjetas = [...seccion.querySelectorAll<HTMLElement>('[data-parada]')];
+  const botones = [...seccion.querySelectorAll<HTMLButtonElement>('[data-ir-a]')];
+
+  const total = Number(seccion.dataset.total);
+  const movil = window.matchMedia('(max-width: 900px)').matches;
+  const ruta = movil ? seccion.dataset.rutaMobile! : seccion.dataset.rutaDesktop!;
+  // En pantallas verticales la imagen completa se ve con franjas negras (se funden con la página).
+  const secuencia = new SecuenciaFrames(
+    canvas,
+    (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`,
+    total,
+    () => (window.innerWidth / window.innerHeight < 1 ? 'contain' : 'cover'),
+  );
+
+  // Carga diferida: empieza cuando la sección se acerca, para no competir con el hero.
+  new IntersectionObserver(
+    (entradas, obs) => {
+      if (entradas.some((e) => e.isIntersecting)) {
+        secuencia.cargar();
+        obs.disconnect();
+      }
+    },
+    { rootMargin: '150% 0px' },
+  ).observe(seccion);
+
+  let activa = '';
+  function actualizar(frame: number) {
+    const parada = tarjetas.find((t) => frame >= Number(t.dataset.desde) && frame <= Number(t.dataset.hasta));
+    const id = parada?.dataset.parada ?? '';
+    if (id === activa) return;
+    activa = id;
+    for (const t of tarjetas) {
+      const on = t === parada;
+      t.dataset.activo = String(on);
+      t.setAttribute('aria-hidden', String(!on));
+    }
+    for (const b of botones) b.dataset.activo = String(b.dataset.irA === id);
+  }
+
+  const disparador = ScrollTrigger.create({
+    trigger: seccion,
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: 0.5,
+    onUpdate: ({ progress }) => {
+      const indice = progress * (total - 1);
+      secuencia.dibujar(indice); // fraccionario: funde los dos frames vecinos
+      barra.style.transform = `scaleX(${progress})`;
+      actualizar(Math.round(indice) + 1);
+    },
+  });
+  actualizar(1);
+
+  // Saltar a una escena: se desplaza hasta el centro de su rango de frames.
+  for (const b of botones) {
+    b.addEventListener('click', () => {
+      const t = tarjetas.find((x) => x.dataset.parada === b.dataset.irA)!;
+      const medio = (Number(t.dataset.desde) + Number(t.dataset.hasta)) / 2;
+      const y = disparador.start + ((medio - 1) / (total - 1)) * (disparador.end - disparador.start);
+      if (window.scrollSuave) window.scrollSuave.scrollTo(y, { duration: 2.2 });
+      else window.scrollTo({ top: y, behavior: 'auto' });
+    });
+  }
+</script>

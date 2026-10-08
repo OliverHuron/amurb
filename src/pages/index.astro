@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Navbar from '../components/Navbar.astro';
 import HeroScroll from '../components/HeroScroll.astro';
+import CiudadRecorrido from '../components/CiudadRecorrido.astro';
+import ScrollSuave from '../components/ScrollSuave.astro';
 
 // Contenido estático: se prerenderiza y Cloudflare lo puede cachear en el edge.
 export const prerender = true;
@@ -9,9 +11,7 @@ export const prerender = true;
 // Secciones aún no construidas: anclas provisionales para la navegación.
 const pendientes = [
   { id: 'nosotros', titulo: 'Nosotros' },
-  { id: 'soluciones', titulo: 'Soluciones' },
   { id: 'marcas', titulo: 'Marcas' },
-  { id: 'campus', titulo: 'Campus 3D' },
   { id: 'contacto', titulo: 'Contacto' },
 ];
 ---
@@ -20,11 +20,13 @@ const pendientes = [
   title="AmUrb | Ambiental y Urbanística de Michoacán"
   description="AmUrb, Ambiental y Urbanística de Michoacán: infraestructura inteligente y suministro estratégico para ciudades y dependencias federales."
 >
+  <ScrollSuave />
   <Navbar />
   <main>
     <HeroScroll />
 
     <div id="contenido" class="relative z-10 bg-noche">
+      <CiudadRecorrido />
       {
         pendientes.map(({ id, titulo }) => (
           <section id={id} class="mx-auto flex min-h-[60svh] max-w-7xl scroll-mt-20 items-center border-t border-white/5 px-5 sm:px-8">

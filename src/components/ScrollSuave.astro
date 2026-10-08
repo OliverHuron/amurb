@@ -1,0 +1,25 @@
+---
+// Scroll suave con inercia (Lenis) sincronizado con GSAP ScrollTrigger.
+// Convierte los saltos de la rueda del ratón en movimiento continuo; en táctil se deja el scroll nativo.
+---
+
+<script>
+  import Lenis from 'lenis';
+  import 'lenis/dist/lenis.css';
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const lenis = new Lenis({
+      lerp: 0.085,
+      wheelMultiplier: 0.9,
+      anchors: { offset: -64 },
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((tiempo) => lenis.raf(tiempo * 1000));
+    gsap.ticker.lagSmoothing(0);
+    window.scrollSuave = lenis;
+  }
+</script>

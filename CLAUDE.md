@@ -50,7 +50,69 @@ Contexto del proyecto para Claude. Idioma de trabajo: **español**.
   2. Después, versión en tiempo real (glTF con luz horneada) a partir de la misma escena.
 - **Notas de Blender 5.1:** el nodo Mix se usa con `data_type='RGBA'` y sockets por nombre y tipo. El cielo `MULTIPLE_SCATTERING` necesita intensidad baja (~0.06 con AgX); con 0.35 todo sale blanco. La lámina de Poly Haven `box_profile_metal_sheet` es rojiza: necesita un tinte fuerte.
 
-### Estado al cierre de la sesión (2026-10-07) — RETOMAR AQUÍ
+### NUEVA DIRECCIÓN (2026-10-07, tarde): ciudad fotorrealista con productos aplicados
+
+El usuario prefiere, en vez del campus de 10 zonas, una **ciudad fotorrealista recorrida con scroll**: la cámara acerca y aleja mostrando **productos aplicados** en distintas partes de la ciudad.
+
+- **Alumbrado:** luminarias solares, faroles de hierro y luminarias.
+- **Seguridad vial:** bolardos trapezoidales, brocales con tapa y coladeras.
+- **Mobiliario:** parabuses Elle y Contempo, bancas, botes y jardineras.
+
+Referencias de producto: fichas de bolardo 120-15-9.5, brocal con tapa ligera, parabús Elle/Contempo y luminaria de línea solar. Los edificios pueden ser **cubos con texturas fotográficas** (lo aprobó el usuario).
+
+- **Código:**
+  - `blender/construir_ciudad.py` es el punto de entrada (`--tomas aereo,alumbrado,vialidad,parabus,plaza|todas` o `--modo solo-escena`).
+  - `blender/ciudad/productos.py`: modelos de los productos a escala real, más el tinaco.
+  - `blender/ciudad/urbano.py`: avenida con camellón, manzanas, casas mexicanas (aplanado de colores, impermeabilizante rojo, tinacos), torres con fachadas de ambientCG, viñetas de producto y anclas en la colección `Paradas`.
+- **Assets CC0:** `node blender/descargar-assets.mjs`.
+  - ambientCG: fachadas, aplanado, tejas, adoquín y asfalto, en `blender/texturas/acg/`.
+  - Poly Haven: modelos glTF en `blender/modelos/` (fuera de git). `street_lamp_01` es el farol de hierro de 3,87 m; `street_lamp_02` es de pared. La jacaranda mide 24 m (escalar a ~0,45). Las fachadas 007–011 son nocturnas.
+- **Estado:** 5 tomas de prueba aprobables en `blender/render/ciudad_*.png`.
+  - **Escena:** 15.265 objetos; se construye en ~40 s; ~20 s por toma a 1080p y 128 muestras.
+  - **Sol:** del sur (`rotacion_sol=140`).
+- **Siguiente:**
+  1. Animar la cámara: aérea → zoom a cada viñeta → salir → siguiente.
+  2. Renderizar ~300–400 frames (unas 2 h): **confirmar con el usuario antes**.
+  3. Convertir a WebP.
+  4. Sección web con scroll y textos por parada, como en el hero.
+  5. Mejoras pendientes: autos, más variedad de fachadas y la vista aérea menos "maqueta".
+
+#### Recorrido (en curso, 2026-10-07 noche) — RETOMAR AQUÍ
+
+- **9 escenas:** ciudad (intro) → alumbrado → vialidad → alcantarillado → parabuses → CCTV → tinacos → plaza → final.
+  - La ruta de cámara está en `blender/ciudad/recorrido.py` (`CLAVES`, `PARADAS`, `FONDO_NEGRO`). Son 540 frames.
+  - **Intro y final:** el mapa **cuadrado** (600 × 600 m, base con espesor) en **vista casi isométrica** (teleobjetivo 50 mm a 1.650 m, azimut -45°, elevación 35°) sobre **fondo negro**, como la página.
+  - **Fondo:** al bajar a la calle se funde al cielo. El mundo mezcla `Is Camera Ray` × valor animado; la iluminación siempre es el cielo.
+- **Comandos:**
+  - Render: `blender … construir_ciudad.py -- --modo recorrido --muestras 96 --ancho 1600 --alto 900`. Es reanudable (omite frames existentes), unos 13 s por frame (~2 h). Log en `blender/render/recorrido.log`.
+  - Pruebas: `--previa` (un frame por escena) o `--solo-frames 1,318`.
+- **Web:**
+  - `src/components/CiudadRecorrido.astro` (sección `#soluciones`, debajo del hero, fondo negro).
+  - `src/lib/secuencia.ts` (canvas reutilizable, `cover` en horizontal y `contain` en vertical).
+  - `src/data/recorrido.ts`: textos y productos por escena. Los rangos deben coincidir con `PARADAS`.
+  - Conversión: `npm run assets:recorrido` (PNG → `public/recorrido/{desktop 1600, mobile 960}`).
+- **Render terminado (2026-10-08):** 540/540 frames verificados. Hubo un corte de luz en el frame 71: el PNG dañado se borró y el render se reanudó. Ya están convertidos: `public/recorrido/desktop` (50,5 MB) y `mobile` (22,7 MB), fuera de git. Revisado en el navegador: las 9 escenas con sus tarjetas, sin errores.
+- **Fluidez (2026-10-08):**
+  - **Lenis:** `ScrollSuave.astro`, en `window.scrollSuave`; `window.lenis` lo reserva la propia librería.
+  - **Fundido entre frames:** `SecuenciaFrames.dibujar` acepta índices fraccionarios; el hero también usa la clase.
+  - **Frames intermedios:** `node blender/calcular-subframes.mjs` → `construir_ciudad.py --modo recorrido --subframes` → `npm run assets:recorrido`, que une todo, renumera y escribe `src/data/recorrido-tiempos.json`. `recorrido.ts` reajusta los rangos de las escenas solo.
+- **Corrección de ruta:** la bajada al alumbrado atravesaba una casa (tiempos 71–76). Nueva ruta: punto alto a 90 m, luego por el arroyo vehicular, con la toma junto a la guarnición (y = -11). Para detectar choques: escaneo de frames con desviación casi 0. **Proceso para retomar:**
+  1. Re-renderizar los frames 21–149 (se borraron).
+  2. Recalcular y renderizar los intermedios.
+  3. Unir.
+  4. Re-escanear.
+- **Resultado final (2026-10-08):**
+  - **Frames:** 707 web (540 principales y 167 intermedios), sin choques. Salto máximo 41, frente a 84 antes; mediana 23.
+  - **Peso:** desktop 68 MB, mobile 30,6 MB.
+  - **Sección:** `h-[950vh]`.
+  - **Pruebas:** las 9 escenas, Lenis y fundido probados en Chrome, sin errores de JS ni de tipos.
+  - **Pendiente:** confirmación del usuario para desplegar.
+- **Avance del render en vivo:** `powershell -ExecutionPolicy Bypass -File blender\progreso-render.ps1`. Tras un corte, revisar si hay PNG dañados, borrarlos y relanzar el mismo comando de render.
+- **Pendiente:**
+  1. Desplegar. Los frames pesan unos 50 MB: **no meterlos a git**. Subirlos aparte al servidor (p. ej. `/var/www/amurb-media/recorrido`, con un `location /recorrido/` en NGINX) y excluir `public/recorrido` del rsync del workflow. Confirmar con el usuario.
+- **Menú:** "Campus 3D" se quitó; "Soluciones" lleva al recorrido.
+
+### Estado al cierre de la sesión anterior (2026-10-07) — campus (antecedente)
 
 - **Hecho:** escena completa y render de prueba aprobado como v1 (`blender/render/still.png`).
   - **Escena:** 4.434 objetos; se construye en ~1,3 s.
@@ -76,6 +138,17 @@ Contexto del proyecto para Claude. Idioma de trabajo: **español**.
      - Va en la sección `#campus` de `index.astro`.
   5. **Tiempo real:** exportar a glTF para three.js con cámara ortográfica y OrbitControls. Los shaders procedurales (vidrio con parteluces, variación por objeto) no se exportan a glTF: habrá que hornearlos a texturas o reimplementarlos. Luz: hornear AO o lightmaps, o usar sombras en tiempo real con HDRI.
 - **Spline:** la escena de Spline (sección siguiente) queda como **antecedente**; el campus definitivo es el de Blender. No borrarla sin preguntar.
+
+## MIGRACIÓN PENDIENTE (2026-10-08) — RETOMAR AQUÍ
+
+- **Nuevo servidor:** `root@2.25.200.198`. El usuario compartió la contraseña en el chat: **no guardarla**; instalar la llave `~/.ssh/id_ed25519` y recomendarle cambiar la contraseña y desactivar el acceso por contraseña.
+- **Nuevo dominio:** **amurb.com.mx**, en la misma cuenta de Cloudflare (NS `fatima`/`joaquin.ns.cloudflare.com`, proxy activo; hoy responde 200 con otro contenido).
+- **Nada se ha tocado todavía en el servidor nuevo.** El usuario dijo "exit" a media revisión.
+- **Pendiente:**
+  1. Preparar el servidor: Node 22, NGINX, PM2, runner y Cloudflare Tunnel o registro DNS.
+  2. Desplegar el sitio y los frames del recorrido (fuera de git).
+  3. Decidir qué pasa con `amurb.siafsystem.online`.
+  4. El código del recorrido y la fluidez aún **no tiene commit ni push**.
 
 ## Producción (en línea desde 2026-10-07)
 

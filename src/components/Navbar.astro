@@ -154,6 +154,8 @@ import { contacto, navegacion as enlaces } from '../data/empresa';
     boton.setAttribute('aria-label', abrir ? 'Cerrar menú' : 'Abrir menú');
     menu.hidden = !abrir;
     document.documentElement.style.overflow = abrir ? 'hidden' : '';
+    if (abrir) window.scrollSuave?.stop();
+    else window.scrollSuave?.start();
     if (abrir) menu.querySelector('a')?.focus();
   };
 

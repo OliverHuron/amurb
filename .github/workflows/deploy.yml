@@ -1,4 +1,4 @@
-name: Despliegue producción (amurb.siafsystem.online)
+name: Despliegue producción (amurb.com.mx)
 
 on:
   push:
@@ -11,7 +11,8 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, amurb]
+    # VPS propio de AmUrb (Tailscale amurb-vps); el runner corre como el usuario sin privilegios `amurb`
+    runs-on: [self-hosted, amurb-vps]
     env:
       APP_DIR: /var/www/amurb
       PORT: 5011
@@ -29,7 +30,7 @@ jobs:
         run: |
           rsync -a --delete \
             --exclude '.git' --exclude 'node_modules' --exclude 'dist' \
-            --exclude '.env' --exclude 'blender' --exclude 'desktop_frames' \
+            --exclude '.env' --exclude 'blender' --exclude 'desktop_frames' --exclude 'public/recorrido' \
             ./ "$APP_DIR/"
 
       - name: Instalar dependencias y compilar
