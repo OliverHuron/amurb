@@ -1,0 +1,49 @@
+---
+import { areas, empresa, sectores, valores } from '../data/empresa';
+
+const tarjeta =
+  'rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:border-verde-luz/40 hover:bg-white/[0.05] hover:shadow-[0_0_40px_-12px] hover:shadow-verde-luz/40 sm:p-8';
+---
+
+<section id="nosotros" aria-labelledby="titulo-nosotros" class="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 sm:py-32">
+  <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Nosotros</p>
+  <h2 id="titulo-nosotros" class="mt-4 max-w-3xl font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+    {empresa.nombre}, {empresa.nombreCompleto}
+  </h2>
+  <p class="mt-6 max-w-3xl text-lg text-white/75">{empresa.quienesSomos}</p>
+
+  <div class="mt-14 grid gap-4 md:grid-cols-6">
+    <article class:list={[tarjeta, 'md:col-span-4']}>
+      <h3 class="font-display text-xl font-semibold text-verde-luz">Misión</h3>
+      <p class="mt-3 text-white/75">{empresa.mision}</p>
+    </article>
+    <article class:list={[tarjeta, 'md:col-span-2']}>
+      <h3 class="font-display text-xl font-semibold text-verde-luz">Visión</h3>
+      <p class="mt-3 text-white/75">{empresa.vision}</p>
+    </article>
+    <article class:list={[tarjeta, 'md:col-span-3']}>
+      <h3 class="font-display text-xl font-semibold text-ambar">Áreas de suministro</h3>
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {areas.map((a) => <li class="rounded-full border border-white/15 px-3 py-1 text-sm text-white/80">{a}</li>)}
+      </ul>
+    </article>
+    <article class:list={[tarjeta, 'md:col-span-3']}>
+      <h3 class="font-display text-xl font-semibold text-ambar">Sectores que atendemos</h3>
+      <ul class="mt-4 space-y-2 text-white/80">
+        {sectores.map((s) => <li class="flex gap-3"><span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-luz" />{s}</li>)}
+      </ul>
+    </article>
+  </div>
+
+  <h3 class="mt-16 font-display text-2xl font-bold">Nuestros valores</h3>
+  <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    {
+      valores.map((v) => (
+        <li class={tarjeta}>
+          <p class="font-display text-lg font-semibold">{v.nombre}</p>
+          <p class="mt-2 text-sm text-white/70">{v.texto}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>

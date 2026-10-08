@@ -1,0 +1,36 @@
+---
+import { marcas } from '../data/empresa';
+---
+
+<section id="marcas" aria-labelledby="titulo-marcas" class="border-t border-white/5">
+  <div class="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 sm:py-28">
+    <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Marcas</p>
+    <h2 id="titulo-marcas" class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Marcas con las que trabajamos</h2>
+    <p class="mt-4 max-w-2xl text-white/70">
+      Distribuimos y suministramos productos de fabricantes reconocidos en alumbrado, mobiliario urbano,
+      redes, hidráulica y equipo técnico.
+    </p>
+    <ul class="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {
+        marcas.map((m) => (
+          <li>
+            {m.url ? (
+              <a
+                href={m.url}
+                target="_blank"
+                rel="noopener"
+                class="flex h-24 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-center font-display text-lg font-semibold text-white/85 transition hover:border-verde-luz/40 hover:text-white hover:shadow-[0_0_40px_-12px] hover:shadow-verde-luz/40"
+              >
+                {m.nombre}
+              </a>
+            ) : (
+              <span class="flex h-24 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-center font-display text-lg font-semibold text-white/85">
+                {m.nombre}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

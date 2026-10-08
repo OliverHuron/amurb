@@ -1,0 +1,48 @@
+---
+import { contacto, empresa } from '../data/empresa';
+
+const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contacto.direccion)}`;
+const anio = new Date().getFullYear();
+---
+
+<section id="contacto" aria-labelledby="titulo-contacto" class="border-t border-white/5">
+  <div class="mx-auto grid max-w-7xl scroll-mt-20 gap-10 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-2">
+    <div>
+      <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Contacto</p>
+      <h2 id="titulo-contacto" class="mt-4 font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+        Hablemos de tu proyecto
+      </h2>
+      <p class="mt-4 max-w-xl text-white/70">
+        Cotiza alumbrado público, mobiliario urbano, seguridad vial, CCTV y suministro de materiales para tu
+        municipio, dependencia o empresa.
+      </p>
+      <a
+        href={contacto.telefonoHref}
+        class="mt-8 inline-flex rounded-full bg-ambar px-6 py-3 font-semibold text-noche transition hover:bg-white"
+      >
+        Llamar al {contacto.telefono}
+      </a>
+    </div>
+
+    <address class="grid gap-4 not-italic sm:grid-cols-2 lg:grid-cols-1">
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <p class="text-sm font-semibold tracking-wider text-white/50 uppercase">Teléfono</p>
+        <a href={contacto.telefonoHref} class="mt-2 block font-display text-2xl font-semibold hover:text-ambar">{contacto.telefono}</a>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <p class="text-sm font-semibold tracking-wider text-white/50 uppercase">Oficinas</p>
+        <p class="mt-2 text-lg">{contacto.direccion}</p>
+        <a href={mapa} target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-semibold text-verde-luz hover:underline">
+          Ver en el mapa →
+        </a>
+      </div>
+    </address>
+  </div>
+
+  <footer class="border-t border-white/5">
+    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-8 text-sm text-white/50 sm:flex-row sm:justify-between sm:px-8">
+      <p>© {anio} {empresa.nombre} · {empresa.nombreCompleto}</p>
+      <p>Morelia, Michoacán, México</p>
+    </div>
+  </footer>
+</section>
