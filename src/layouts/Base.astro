@@ -1,12 +1,62 @@
 ---
 import '../styles/global.css';
+import { contacto, empresa } from '../data/empresa';
 
 interface Props {
   title: string;
   description: string;
+  /** Imagen para compartir (ruta absoluta del sitio). */
+  imagen?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, imagen = '/og.jpg' } = Astro.props;
+const sitio = Astro.site ?? new URL('https://amurb.com.mx');
+const canonica = new URL(Astro.url.pathname, sitio).href;
+const imagenAbsoluta = new URL(imagen, sitio).href;
+
+// Datos estructurados (schema.org): organización + negocio local para resultados de Google.
+const datosEstructurados = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${sitio.href}#organizacion`,
+      name: empresa.nombre,
+      legalName: empresa.nombreCompleto,
+      alternateName: 'Grupo CRUBA',
+      url: sitio.href,
+      logo: new URL('/brand/logo.webp', sitio).href,
+      description: empresa.quienesSomos,
+      slogan: empresa.lema,
+    },
+    {
+      '@type': 'LocalBusiness',
+      '@id': `${sitio.href}#negocio`,
+      name: `${empresa.nombre} — ${empresa.nombreCompleto}`,
+      url: sitio.href,
+      image: imagenAbsoluta,
+      telephone: contacto.telefonoHref.replace('tel:', ''),
+      parentOrganization: { '@id': `${sitio.href}#organizacion` },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Calle Valle de Carácuaro #79, Col. Valle Quieto',
+        addressLocality: 'Morelia',
+        addressRegion: 'Michoacán',
+        postalCode: '58066',
+        addressCountry: 'MX',
+      },
+      areaServed: { '@type': 'Country', name: 'México' },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${sitio.href}#sitio`,
+      url: sitio.href,
+      name: empresa.nombre,
+      inLanguage: 'es-MX',
+      publisher: { '@id': `${sitio.href}#organizacion` },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -14,11 +64,32 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonica} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#070b14" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>{title}</title>
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <!-- Open Graph / redes sociales -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content={empresa.nombre} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:image" content={imagenAbsoluta} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${empresa.nombre}: ${empresa.lema}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imagenAbsoluta} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(datosEstructurados)} />
     <slot name="head" />
   </head>
   <body class="min-h-svh bg-noche font-sans text-white">
