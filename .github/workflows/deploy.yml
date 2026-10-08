@@ -41,6 +41,10 @@ jobs:
 
       - name: Arrancar o recargar con PM2
         working-directory: /var/www/amurb
+        env:
+          # Sin esto el runner mata al terminar el job los procesos que lanzó (incluida la app).
+          # El daemon de PM2 corre aparte como servicio systemd `pm2-amurb`.
+          RUNNER_TRACKING_ID: ''
         run: |
           export AMURB_NODE="$(which node)"
           if pm2 describe amurb > /dev/null 2>&1; then
