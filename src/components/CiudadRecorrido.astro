@@ -79,6 +79,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { SecuenciaFrames } from '../lib/secuencia';
+  import { ruedaSuave } from '../lib/rueda-suave';
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -140,6 +141,12 @@ import { RECORRIDO, paradas } from '../data/recorrido';
     },
   });
   actualizar(1);
+
+  // Rueda del mouse con pasos cortos y continuos dentro del recorrido (como las flechas del teclado).
+  ruedaSuave({
+    rango: () => ({ inicio: disparador.start, fin: disparador.end }),
+    alMover: () => ScrollTrigger.update(),
+  });
 
   // Saltar a una escena: se desplaza hasta el centro de su rango de frames.
   for (const b of botones) {
