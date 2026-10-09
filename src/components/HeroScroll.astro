@@ -181,7 +181,8 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
   const total = Number(esVertical ? hero.dataset.totalMobile : hero.dataset.totalDesktop);
 
   // ---------- Secuencia de frames (con fundido entre frames) ----------
-  const secuencia = new SecuenciaFrames(canvas, (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`, total);
+  // suavizado 0: el scrub de GSAP del timeline ya suaviza; dos suavizados encadenados se sienten "chiclosos"
+  const secuencia = new SecuenciaFrames(canvas, (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`, total, undefined, { suavizado: 0 });
   secuencia.cargar(10, 6, () => (poster.style.opacity = '0'));
 
   // ---------- Texto y scroll ----------

@@ -3,7 +3,9 @@
 //  - el canvas nunca es más grande que el frame original (el CSS escala; dibujar de más es CPU perdida);
 //  - los frames se guardan comprimidos (Blob, ~100 KB) y solo una VENTANA alrededor de la posición
 //    actual se decodifica como ImageBitmap ya escalado al tamaño de dibujo (drawImage sin reescalar);
-//  - se dibuja en requestAnimationFrame y solo cuando cambia la posición.
+//  - un único ciclo de dibujo (requestAnimationFrame) acerca suavemente el frame mostrado al que pide
+//    el scroll y pinta en ese mismo cuadro: la rueda del mouse, la barra y el touch se ven igual de
+//    fluidos (antes, con Lenis, la rueda congelaba ~47 % de los cuadros por un desfase de un cuadro).
 
 export type Ajuste = 'cover' | 'contain';
 
@@ -12,6 +14,11 @@ interface Opciones {
   adelante?: number;
   /** Frames decodificados hacia atrás. */
   atras?: number;
+  /**
+   * Suavizado de la animación hacia el frame pedido (segundos para recorrer ~63 % de la distancia).
+   * 0 = sin suavizado (cuando quien llama ya suaviza, p. ej. un scrub de GSAP).
+   */
+  suavizado?: number;
 }
 
 export class SecuenciaFrames {
@@ -21,15 +28,20 @@ export class SecuenciaFrames {
   private descargando = new Set<number>();
   private ctx: CanvasRenderingContext2D;
   private posicion = 0;
+  private objetivo = 0;
   private dibujada = -1;
   private sentido = 1;
-  private pendiente = false;
+  private enCiclo = false;
+  private ultimoTick = 0;
+  private readonly suavizado: number;
   private cargando = false;
   private anchoFrame = 0;
   private altoFrame = 0;
   private generacion = 0; // cambia al redimensionar: invalida bitmaps escalados al tamaño anterior
   private readonly adelante: number;
   private readonly atras: number;
+  /** Estadísticas para pruebas (/?fps): cuadros pintados con el frame exacto vs. con uno aproximado. */
+  readonly estadisticas = { exactos: 0, aproximados: 0, ultimoPintado: 0 };
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -43,22 +55,47 @@ export class SecuenciaFrames {
     const movil = window.matchMedia('(max-width: 900px)').matches;
     this.adelante = opciones.adelante ?? (movil ? 16 : 28);
     this.atras = opciones.atras ?? (movil ? 6 : 10);
+    this.suavizado = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : (opciones.suavizado ?? 0.12);
     window.addEventListener('resize', () => this.ajustarTamano());
   }
 
-  /** Fija la posición (puede ser fraccionaria: se funden los dos frames vecinos) y agenda el dibujo. */
+  /** Pide ir a la posición `i` (puede ser fraccionaria). El ciclo de dibujo llega a ella suavemente. */
   dibujar(i: number) {
-    const nueva = Math.max(0, Math.min(this.total - 1, i));
-    if (nueva !== this.posicion) this.sentido = nueva > this.posicion ? 1 : -1;
-    this.posicion = nueva;
+    const nuevo = Math.max(0, Math.min(this.total - 1, i));
+    if (nuevo !== this.objetivo) this.sentido = nuevo > this.objetivo ? 1 : -1;
+    this.objetivo = nuevo;
     this.decodificarVentana();
-    if (!this.pendiente) {
-      this.pendiente = true;
-      requestAnimationFrame(() => {
-        this.pendiente = false;
-        this.pintarCuadro();
-      });
+    if (!this.enCiclo) {
+      this.enCiclo = true;
+      this.ultimoTick = performance.now();
+      requestAnimationFrame((t) => this.tick(t));
     }
+  }
+
+  /** Vuelve a pintar la posición actual (p. ej. al llegar un frame decodificado) sin tocar el objetivo. */
+  private repintar() {
+    this.dibujada = -1;
+    if (!this.enCiclo) {
+      this.enCiclo = true;
+      this.ultimoTick = performance.now();
+      requestAnimationFrame((t) => this.tick(t));
+    }
+  }
+
+  /** Un cuadro del ciclo: acerca la posición al objetivo (independiente de los fps) y pinta ya. */
+  private tick(t: number) {
+    const dt = Math.min(0.1, (t - this.ultimoTick) / 1000);
+    this.ultimoTick = t;
+    const restante = this.objetivo - this.posicion;
+    if (this.suavizado > 0 && Math.abs(restante) > 0.004) {
+      this.posicion += restante * (1 - Math.exp(-dt / this.suavizado));
+    } else {
+      this.posicion = this.objetivo;
+    }
+    this.decodificarVentana();
+    this.pintarCuadro();
+    if (this.posicion !== this.objetivo) requestAnimationFrame((s) => this.tick(s));
+    else this.enCiclo = false;
   }
 
   // ---------------------------------------------------------------- dibujo
@@ -83,6 +120,9 @@ export class SecuenciaFrames {
       this.ctx.globalAlpha = 1;
     }
     this.dibujada = bmpA ? this.posicion : -1;
+    if (bmpA) this.estadisticas.exactos++;
+    else this.estadisticas.aproximados++;
+    this.estadisticas.ultimoPintado = this.posicion;
   }
 
   private masCercano(i: number) {
@@ -170,10 +210,7 @@ export class SecuenciaFrames {
       if (generacion !== this.generacion) bmp.close();
       else {
         this.bitmaps.set(i, bmp);
-        if (Math.abs(i - this.posicion) < 2) {
-          this.dibujada = -1;
-          this.dibujar(this.posicion);
-        }
+        if (Math.abs(i - this.posicion) < 2) this.repintar();
       }
     } catch {
       /* frame dañado o no soportado: se usa el más cercano */
@@ -214,8 +251,7 @@ export class SecuenciaFrames {
     this.cargando = true;
     await this.descargar(0);
     await this.decodificar(0);
-    this.dibujada = -1;
-    this.dibujar(this.posicion);
+    this.repintar();
     alPrimerFrame?.();
     const orden: number[] = [];
     for (let i = salto; i < this.total; i += salto) orden.push(i);

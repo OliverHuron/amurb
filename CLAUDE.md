@@ -93,7 +93,7 @@ Referencias de producto: fichas de bolardo 120-15-9.5, brocal con tapa ligera, p
   - Conversión: `npm run assets:recorrido` (PNG → `public/recorrido/{desktop 1600, mobile 960}`).
 - **Render terminado (2026-10-08):** 540/540 frames verificados. Hubo un corte de luz en el frame 71: el PNG dañado se borró y el render se reanudó. Ya están convertidos: `public/recorrido/desktop` (50,5 MB) y `mobile` (22,7 MB), fuera de git. Revisado en el navegador: las 9 escenas con sus tarjetas, sin errores.
 - **Fluidez (2026-10-08):**
-  - **Lenis:** `ScrollSuave.astro`, en `window.scrollSuave`; `window.lenis` lo reserva la propia librería.
+  - **Sin Lenis (retirado 2026-10-08):** con la rueda del mouse congelaba ~47 % de los frames. Ahora `SecuenciaFrames` tiene su propio ciclo rAF con interpolación (`suavizado` 0,12 s en el recorrido; 0 en el hero, que ya usa el scrub de GSAP). Medidor de fluidez: `?fps` en la URL (`MedidorFps.astro`).
   - **Fundido entre frames:** `SecuenciaFrames.dibujar` acepta índices fraccionarios; el hero también usa la clase.
   - **Frames intermedios:** `node blender/calcular-subframes.mjs` → `construir_ciudad.py --modo recorrido --subframes` → `npm run assets:recorrido`, que une todo, renumera y escribe `src/data/recorrido-tiempos.json`. `recorrido.ts` reajusta los rangos de las escenas solo.
 - **Corrección de ruta:** la bajada al alumbrado atravesaba una casa (tiempos 71–76). Nueva ruta: punto alto a 90 m, luego por el arroyo vehicular, con la toma junto a la guarnición (y = -11). Para detectar choques: escaneo de frames con desviación casi 0. **Proceso para retomar:**
@@ -105,8 +105,8 @@ Referencias de producto: fichas de bolardo 120-15-9.5, brocal con tapa ligera, p
   - **Frames:** 707 web (540 principales y 167 intermedios), sin choques. Salto máximo 41, frente a 84 antes; mediana 23.
   - **Peso:** desktop 68 MB, mobile 30,6 MB.
   - **Sección:** `h-[950vh]`.
-  - **Pruebas:** las 9 escenas, Lenis y fundido probados en Chrome, sin errores de JS ni de tipos.
-  - **Pendiente:** confirmación del usuario para desplegar.
+  - **Pruebas:** las 9 escenas y el fundido probados en Chrome, sin errores de JS ni de tipos. Desplegado.
+  - **Pendiente:** render vertical 9:16 para móvil (720×1280, ~1,5–2 h): confirmar con el usuario.
 - **Avance del render en vivo:** `powershell -ExecutionPolicy Bypass -File blender\progreso-render.ps1`. Tras un corte, revisar si hay PNG dañados, borrarlos y relanzar el mismo comando de render.
 - **Pendiente:**
   1. Desplegar. Los frames pesan unos 50 MB: **no meterlos a git**. Subirlos aparte al servidor (p. ej. `/var/www/amurb-media/recorrido`, con un `location /recorrido/` en NGINX) y excluir `public/recorrido` del rsync del workflow. Confirmar con el usuario.
@@ -148,6 +148,9 @@ Referencias de producto: fichas de bolardo 120-15-9.5, brocal con tapa ligera, p
   - metadatos, Open Graph (`public/og.jpg`, generado con `scripts/generar-og.mjs`) y JSON-LD (Organization, LocalBusiness y WebSite);
   - `robots.txt`, `sitemap.xml` y la clave de IndexNow (`public/0c4f….txt`), con la URL ya enviada (202);
   - secciones con contenido real: `Nosotros.astro`, `Marcas.astro` y `Contacto.astro` con pie de página (unas 555 palabras indexables).
+- **Rendimiento (2026-10-08, desplegado):** `SecuenciaFrames` guarda los frames comprimidos (Blob) y decodifica solo una ventana de ~40 ImageBitmaps ya escalados; el canvas nunca supera el tamaño del frame y se dibuja en rAF solo si cambia la posición. Medidor de pruebas: `https://amurb.com.mx/?fps`.
+  - Pruebas reales del usuario **antes** de esto: iPhone 11 Pro Max bien con tirones; i7-13700K + 4070 bien; i5 de 9.ª sin gráfica mal; i7 de 13.ª sin gráfica mejor.
+- **Pendiente: render vertical 9:16 para móvil.** Hoy los frames de móvil son 960×540 horizontales y en el iPhone se ven como una franja 16:9, ampliada y borrosa. Plan: 720×1280 con las mismas claves de cámara ajustando el lente, unas 1,5–2 h. Confirmar antes de lanzarlo.
 - **Pendiente del usuario:**
   1. Google Search Console: propiedad de dominio, TXT en Cloudflare, enviar el sitemap y pedir la indexación.
   2. Google Business Profile.

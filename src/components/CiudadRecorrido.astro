@@ -98,6 +98,9 @@ import { RECORRIDO, paradas } from '../data/recorrido';
     () => (window.innerWidth / window.innerHeight < 1 ? 'contain' : 'cover'),
   );
 
+  // Pruebas de fluidez en dispositivos reales (/?fps)
+  if (new URLSearchParams(location.search).has('fps')) (window as unknown as { secuenciaRecorrido: SecuenciaFrames }).secuenciaRecorrido = secuencia;
+
   // Carga diferida: empieza cuando la sección se acerca, para no competir con el hero.
   new IntersectionObserver(
     (entradas, obs) => {
@@ -143,8 +146,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
       const t = tarjetas.find((x) => x.dataset.parada === b.dataset.irA)!;
       const medio = (Number(t.dataset.desde) + Number(t.dataset.hasta)) / 2;
       const y = disparador.start + ((medio - 1) / (total - 1)) * (disparador.end - disparador.start);
-      if (window.scrollSuave) window.scrollSuave.scrollTo(y, { duration: 2.2 });
-      else window.scrollTo({ top: y, behavior: 'auto' });
+      window.scrollTo({ top: y, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     });
   }
 </script>
