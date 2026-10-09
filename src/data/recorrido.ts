@@ -7,6 +7,8 @@ export const RECORRIDO = {
   frames: tiempos.length,
   rutaDesktop: '/recorrido/desktop/',
   rutaMobile: '/recorrido/mobile/',
+  // AVIF: ~1/3 menos peso que WebP a igual calidad; decodifica fuera del hilo principal (~1 ms más por frame)
+  extension: 'avif',
 };
 
 export interface Parada {

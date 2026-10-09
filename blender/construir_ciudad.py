@@ -135,7 +135,7 @@ def recorrido(args, cam, salida):
         for n, t in enumerate(tiempos, start=1):
             entero = int(t)
             fraccion = round(t - entero, 2)
-            ruta = os.path.join(carpeta_sub, f'frame_{entero:04d}_{int(fraccion * 100):02d}.png')
+            ruta = os.path.join(carpeta_sub, f'frame_{entero:04d}_{round(fraccion * 100):02d}.png')  # round: 0.29*100 = 28.999…
             if os.path.exists(ruta):
                 continue
             esc.frame_set(entero, subframe=fraccion)

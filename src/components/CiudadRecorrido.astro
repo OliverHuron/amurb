@@ -9,6 +9,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   data-total={RECORRIDO.frames}
   data-ruta-desktop={RECORRIDO.rutaDesktop}
   data-ruta-mobile={RECORRIDO.rutaMobile}
+  data-extension={RECORRIDO.extension}
   aria-label="Soluciones aplicadas en la ciudad"
   class="relative h-[950vh] bg-black"
 >
@@ -93,7 +94,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   // En pantallas verticales la imagen completa se ve con franjas negras (se funden con la página).
   const secuencia = new SecuenciaFrames(
     canvas,
-    (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`,
+    (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.${seccion.dataset.extension}`,
     total,
     () => (window.innerWidth / window.innerHeight < 1 ? 'contain' : 'cover'),
   );

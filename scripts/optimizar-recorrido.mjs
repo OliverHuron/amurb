@@ -1,7 +1,8 @@
-// Convierte el recorrido de Blender a WebP para la web, uniendo los frames normales con los intermedios:
+// Convierte el recorrido de Blender a AVIF para la web, uniendo los frames normales con los intermedios:
 //   blender/render/recorrido/frame_####.png        (t = ####)
 //   blender/render/recorrido-sub/frame_####_ff.png  (t = ####.ff, tramos donde la cámara va rápido)
-// Salida: public/recorrido/{desktop 1600x900, mobile 960x540}/frame_0001.webp… (numeración consecutiva)
+// Salida: public/recorrido/{desktop 1600x900, mobile 960x540}/frame_0001.avif… (numeración consecutiva)
+//   AVIF q48 ≈ 2/3 del peso de WebP q62 con la misma calidad visual (medido en 40 frames).
 //         src/data/recorrido-tiempos.json  (tiempo de Blender de cada frame web, para ubicar las escenas)
 // Uso: node scripts/optimizar-recorrido.mjs
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
@@ -11,8 +12,8 @@ import sharp from 'sharp';
 const RAIZ = path.resolve(import.meta.dirname, '..');
 const RENDER = path.join(RAIZ, 'blender/render');
 const SALIDAS = [
-  { carpeta: path.join(RAIZ, 'public/recorrido/desktop'), ancho: 1600, alto: 900, calidad: 62 },
-  { carpeta: path.join(RAIZ, 'public/recorrido/mobile'), ancho: 960, alto: 540, calidad: 58 },
+  { carpeta: path.join(RAIZ, 'public/recorrido/desktop'), ancho: 1600, alto: 900, calidad: 48 },
+  { carpeta: path.join(RAIZ, 'public/recorrido/mobile'), ancho: 960, alto: 540, calidad: 46 },
 ];
 
 async function listar(carpeta, patron, aTiempo) {
@@ -32,12 +33,12 @@ for (const s of SALIDAS) {
 }
 for (let i = 0; i < frames.length; i += 4) {
   await Promise.all(frames.slice(i, i + 4).map(async ({ ruta }, k) => {
-    const nombre = `frame_${String(i + k + 1).padStart(4, '0')}.webp`;
+    const nombre = `frame_${String(i + k + 1).padStart(4, '0')}.avif`;
     for (const s of SALIDAS) {
-      await sharp(ruta).resize(s.ancho, s.alto).webp({ quality: s.calidad, effort: 5 }).toFile(path.join(s.carpeta, nombre));
+      await sharp(ruta).resize(s.ancho, s.alto).avif({ quality: s.calidad, effort: 4 }).toFile(path.join(s.carpeta, nombre));
     }
   }));
-  process.stdout.write(`\rWebP: ${Math.min(i + 4, frames.length)}/${frames.length}`);
+  process.stdout.write(`\rAVIF:${Math.min(i + 4, frames.length)}/${frames.length}`);
 }
 await writeFile(path.join(RAIZ, 'src/data/recorrido-tiempos.json'), JSON.stringify(frames.map((f) => f.t)));
 console.log(`\nRecorrido: ${frames.length} frames web (${frames.filter((f) => !Number.isInteger(f.t)).length} intermedios)`);
