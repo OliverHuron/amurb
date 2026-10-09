@@ -22,4 +22,29 @@
     gsap.ticker.lagSmoothing(0);
     window.scrollSuave = lenis;
   }
+
+  // Medidor de fluidez para pruebas en dispositivos reales: https://amurb.com.mx/?fps
+  if (new URLSearchParams(location.search).has('fps')) {
+    const caja = document.createElement('div');
+    caja.style.cssText =
+      'position:fixed;left:8px;bottom:8px;z-index:99;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.75);color:#9fd36b;font:600 12px/1.4 monospace;pointer-events:none';
+    document.body.append(caja);
+    let previo = performance.now();
+    let tiempos: number[] = [];
+    let ultimo = previo;
+    const medir = (t: number) => {
+      tiempos.push(t - previo);
+      previo = t;
+      if (t - ultimo > 1000) {
+        const orden = [...tiempos].sort((a, b) => a - b);
+        const peor = orden[Math.floor(orden.length * 0.95)] ?? 0;
+        const tirones = tiempos.filter((x) => x > 34).length;
+        caja.textContent = `${tiempos.length} fps · p95 ${peor.toFixed(0)} ms · tirones ${tirones}`;
+        tiempos = [];
+        ultimo = t;
+      }
+      requestAnimationFrame(medir);
+    };
+    requestAnimationFrame(medir);
+  }
 </script>
