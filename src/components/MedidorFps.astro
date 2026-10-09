@@ -1,26 +1,51 @@
 ---
 // Medidor de fluidez para pruebas en dispositivos reales: https://amurb.com.mx/?fps
 // (no aparece para los visitantes normales).
+// Línea 1: fps, peor 5 % del tiempo entre cuadros y cuadros lentos (> 34 ms).
+// Línea 2 (en el recorrido): avance máximo de la imagen en un cuadro de pantalla (en imágenes),
+//   veces que se pintó una imagen aproximada (la exacta no estaba lista) y la rueda: clics por
+//   segundo, último deltaY y deltaMode (0 = píxeles, 1 = líneas).
 ---
 
 <script>
   if (new URLSearchParams(location.search).has('fps')) {
     const caja = document.createElement('div');
     caja.style.cssText =
-      'position:fixed;left:8px;bottom:8px;z-index:99;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.75);color:#9fd36b;font:600 12px/1.4 monospace;pointer-events:none';
+      'position:fixed;left:8px;bottom:8px;z-index:99;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.75);color:#9fd36b;font:600 12px/1.4 monospace;pointer-events:none;white-space:pre';
     document.body.append(caja);
+
+    type Stats = { aproximados: number; ultimoPintado: number };
+    const secuencia = () => (window as unknown as { secuenciaRecorrido?: { estadisticas: Stats } }).secuenciaRecorrido;
+    let rueda = { eventos: 0, delta: 0, modo: 0 };
+    window.addEventListener('wheel', (e) => (rueda = { eventos: rueda.eventos + 1, delta: e.deltaY, modo: e.deltaMode }), { passive: true });
+
     let previo = performance.now();
     let tiempos: number[] = [];
     let ultimo = previo;
+    let pintadoPrevio = 0;
+    let avanceMax = 0;
+    let aproxPrevio = 0;
     const medir = (t: number) => {
       tiempos.push(t - previo);
       previo = t;
+      const s = secuencia()?.estadisticas;
+      if (s) {
+        avanceMax = Math.max(avanceMax, Math.abs(s.ultimoPintado - pintadoPrevio));
+        pintadoPrevio = s.ultimoPintado;
+      }
       if (t - ultimo > 1000) {
         const orden = [...tiempos].sort((a, b) => a - b);
         const peor = orden[Math.floor(orden.length * 0.95)] ?? 0;
         const tirones = tiempos.filter((x) => x > 34).length;
-        caja.textContent = `${tiempos.length} fps · p95 ${peor.toFixed(0)} ms · tirones ${tirones}`;
+        let texto = `${tiempos.length} fps · p95 ${peor.toFixed(0)} ms · tirones ${tirones}`;
+        if (s) {
+          texto += `\nsalto ${avanceMax.toFixed(2)} · aprox ${s.aproximados - aproxPrevio} · rueda ${rueda.eventos}/s Δ${Math.round(rueda.delta)} m${rueda.modo}`;
+          aproxPrevio = s.aproximados;
+        }
+        caja.textContent = texto;
         tiempos = [];
+        avanceMax = 0;
+        rueda.eventos = 0;
         ultimo = t;
       }
       requestAnimationFrame(medir);
