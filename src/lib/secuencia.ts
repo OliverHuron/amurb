@@ -55,7 +55,8 @@ export class SecuenciaFrames {
     const movil = window.matchMedia('(max-width: 900px)').matches;
     this.adelante = opciones.adelante ?? (movil ? 16 : 28);
     this.atras = opciones.atras ?? (movil ? 6 : 10);
-    this.suavizado = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : (opciones.suavizado ?? 0.12);
+    // Sin excepción por "reducir movimiento": solo interpola el movimiento que pide el propio scroll.
+    this.suavizado = opciones.suavizado ?? 0.12;
     window.addEventListener('resize', () => this.ajustarTamano());
   }
 

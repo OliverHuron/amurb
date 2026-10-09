@@ -2,7 +2,9 @@
 // Cada clic de rueda salta ~100 px de golpe; en una secuencia larga eso son muchas imágenes por clic y se
 // ve como arrancón-frenón. Aquí, dentro del tramo, la rueda avanza menos por clic y el desplazamiento se
 // reparte en el tiempo (suavizado exponencial), como el scroll continuo de las flechas.
-// Fuera del tramo, en trackpads con pellizco (ctrlKey) y con "reducir movimiento", la rueda es la nativa.
+// Fuera del tramo y con pellizco de trackpad (ctrlKey), la rueda es la nativa.
+// Se aplica también con "reducir movimiento" (Windows lo activa al apagar los efectos de animación): no
+// agrega movimiento, solo reparte el que pide el usuario; sin esto cada clic brincaba ~15 imágenes de golpe.
 
 interface Opciones {
   /** Rango de scroll (px) donde actúa; se consulta en cada evento (cambia al redimensionar). */
@@ -16,8 +18,6 @@ interface Opciones {
 }
 
 export function ruedaSuave({ rango, factor = 0.55, suavizado = 0.32, alMover }: Opciones) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
   let objetivo = 0;
   let actual = 0;
   let ultimoAsignado = -1;
@@ -36,7 +36,8 @@ export function ruedaSuave({ rango, factor = 0.55, suavizado = 0.32, alMover }: 
     ultimoTick = t;
     const restante = objetivo - actual;
     actual = Math.abs(restante) < 0.5 ? objetivo : actual + restante * (1 - Math.exp(-dt / suavizado));
-    window.scrollTo(0, actual);
+    // 'instant': el CSS global tiene scroll-behavior: smooth y convertiría esto en otra animación encima
+    window.scrollTo({ top: actual, behavior: 'instant' });
     ultimoAsignado = window.scrollY;
     alMover?.();
     if (actual !== objetivo) requestAnimationFrame(tick);
