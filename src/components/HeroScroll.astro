@@ -43,13 +43,14 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
       <div class="relative w-full max-w-3xl">
         <!-- Bloque 1 -->
         <div data-beat="1" class="hero-beat">
-          <p class="mb-5 font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase sm:text-sm">
-            <span class="linea"><span>{empresa.nombreCompleto}</span></span>
-          </p>
-          <h1 class="font-display text-[clamp(2.6rem,7vw,5.75rem)] leading-[1.02] font-bold tracking-tight text-balance">
+          <!-- H1 con la marca (SEO: búsquedas de "AmUrb"); el lema grande es solo visual -->
+          <h1 class="mb-5 font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase sm:text-sm">
+            <span class="linea"><span>{empresa.nombre} · {empresa.nombreCompleto}</span></span>
+          </h1>
+          <p class="font-display text-[clamp(2.6rem,7vw,5.75rem)] leading-[1.02] font-bold tracking-tight text-balance">
             <span class="linea"><span>Soluciones</span></span>
             <span class="linea"><span><em class="texto-luz not-italic">innovadoras</em></span></span>
-          </h1>
+          </p>
           <p class="mt-6 max-w-xl text-base text-white/75 sm:text-lg">
             <span class="linea"><span>{empresa.bajada}</span></span>
           </p>
