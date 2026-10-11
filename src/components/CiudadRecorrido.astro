@@ -61,7 +61,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
     </div>
 
     <!-- Índice de escenas -->
-    <nav aria-label="Escenas del recorrido" class="absolute top-1/2 right-5 z-10 hidden -translate-y-1/2 sm:right-8 lg:block">
+    <nav aria-label="Escenas del recorrido" class="absolute top-28 right-5 z-10 hidden sm:right-8 lg:block">
       <ol class="flex flex-col items-end gap-3">
         {
           paradas.slice(1, -1).map((p) => (
@@ -80,6 +80,44 @@ import { RECORRIDO, paradas } from '../data/recorrido';
         }
       </ol>
     </nav>
+
+    <!-- Escena anterior / siguiente: avanzan a velocidad de reproducción y se detienen en la escena vecina -->
+    <button
+      type="button"
+      data-escena-anterior
+      aria-label="Escena anterior"
+      class="flecha absolute top-1/2 left-3 z-20 -translate-y-1/2 sm:left-6"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-2"><path d="M15 5l-7 7 7 7" /></svg>
+    </button>
+    <button
+      type="button"
+      data-escena-siguiente
+      aria-label="Escena siguiente"
+      class="flecha absolute top-1/2 right-3 z-20 -translate-y-1/2 sm:right-6"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-2"><path d="M9 5l7 7-7 7" /></svg>
+    </button>
+
+    <!-- Reproducir: recorre la ciudad solo, con pausas en cada producto (útil en equipos lentos) -->
+    <div class="absolute top-24 left-5 z-20 sm:top-auto sm:right-8 sm:bottom-[10vh] sm:left-auto">
+      <button
+        type="button"
+        data-reproducir
+        data-estado="detenido"
+        aria-label="Reproducir el recorrido"
+        class="group flex items-center gap-3 text-left sm:flex-row-reverse sm:text-right"
+      >
+        <span class="boton-play relative grid size-14 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ambar to-verde-luz text-noche shadow-[0_0_32px_-6px] shadow-ambar/70 transition-transform group-hover:scale-105 group-active:scale-95">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="icono-play ml-0.5 size-6 fill-current"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5Z" /></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="icono-pausa hidden size-6 fill-current"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+        </span>
+        <span class="[text-shadow:0_1px_10px_rgb(0_0_0/0.9)]">
+          <span data-reproducir-titulo class="block font-display text-sm font-semibold tracking-wide">Reproducir recorrido</span>
+          <span data-reproducir-ayuda class="block text-xs text-white/70">o desliza para explorarlo a tu ritmo</span>
+        </span>
+      </button>
+    </div>
 
     <div class="absolute inset-x-0 bottom-0 z-10 h-0.5 bg-white/10">
       <div data-recorrido-barra class="h-full w-full origin-left scale-x-0 bg-gradient-to-r from-ambar to-verde-luz"></div>
@@ -111,7 +149,57 @@ import { RECORRIDO, paradas } from '../data/recorrido';
     transform: none;
     transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 70ms);
   }
+  /* Flechas laterales: vidrio oscuro, borde con el degradado al pasar el mouse */
+  .flecha {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.35);
+    border: 1px solid rgb(255 255 255 / 0.18);
+    backdrop-filter: blur(8px);
+    transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+  }
+  .flecha:hover {
+    background: rgb(0 0 0 / 0.55);
+    border-color: var(--color-ambar);
+  }
+  .flecha:disabled {
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  /* Invitación a reproducir: un halo que late mientras está detenido */
+  [data-estado='detenido'] .boton-play::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    border: 2px solid var(--color-ambar);
+    opacity: 0;
+    animation: halo 2.4s ease-out infinite;
+  }
+  @keyframes halo {
+    0% {
+      transform: scale(0.85);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1.35);
+      opacity: 0;
+    }
+  }
+  [data-estado='reproduciendo'] .icono-play {
+    display: none;
+  }
+  [data-estado='reproduciendo'] .icono-pausa {
+    display: block;
+  }
   @media (prefers-reduced-motion: reduce) {
+    [data-estado='detenido'] .boton-play::after {
+      animation: none;
+    }
     .escena .linea > :global(*),
     .escena[data-activo='true'] .linea > :global(*) {
       transform: none;
@@ -125,6 +213,7 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { SecuenciaFrames } from '../lib/secuencia';
   import { ruedaSuave } from '../lib/rueda-suave';
+  import { Reproductor } from '../lib/reproductor';
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -193,9 +282,53 @@ import { RECORRIDO, paradas } from '../data/recorrido';
     alMover: () => ScrollTrigger.update(),
   });
 
+  // ---------- Reproducción automática y flechas ----------
+  const centro = (t: HTMLElement) => (Number(t.dataset.desde) + Number(t.dataset.hasta)) / 2 - 1; // índice 0-based
+  const aScroll = (indice: number) => disparador.start + (indice / (total - 1)) * (disparador.end - disparador.start);
+  const botonPlay = seccion.querySelector<HTMLButtonElement>('[data-reproducir]')!;
+  const tituloPlay = seccion.querySelector<HTMLElement>('[data-reproducir-titulo]')!;
+  const ayudaPlay = seccion.querySelector<HTMLElement>('[data-reproducir-ayuda]')!;
+  const anterior = seccion.querySelector<HTMLButtonElement>('[data-escena-anterior]')!;
+  const siguiente = seccion.querySelector<HTMLButtonElement>('[data-escena-siguiente]')!;
+
+  // Paradas de las flechas: inicio del mapa, el centro de cada escena de productos y el final.
+  const conProductos = tarjetas.filter((t) => t.querySelector('ul')).map(centro);
+  const escenas = [0, ...conProductos, total - 1];
+
+  const reproductor = new Reproductor({
+    total,
+    aScroll,
+    indiceActual: () => disparador.progress * (total - 1),
+    escenas,
+    pausas: conProductos,
+    alMover: () => ScrollTrigger.update(),
+    alCambiarEstado: (estado) => {
+      botonPlay.dataset.estado = estado;
+      const enPlay = estado === 'reproduciendo';
+      botonPlay.setAttribute('aria-label', enPlay ? 'Pausar el recorrido' : 'Reproducir el recorrido');
+      tituloPlay.textContent = enPlay ? 'Pausar' : 'Reproducir recorrido';
+      ayudaPlay.textContent = enPlay ? 'desliza cuando quieras para tomar el control' : 'o desliza para explorarlo a tu ritmo';
+    },
+  });
+
+  if (new URLSearchParams(location.search).has('fps')) (window as unknown as { reproductorRecorrido: Reproductor }).reproductorRecorrido = reproductor;
+
+  botonPlay.addEventListener('click', () => (reproductor.estado === 'reproduciendo' ? reproductor.detener() : reproductor.reproducir()));
+  anterior.addEventListener('click', () => reproductor.irA(-1));
+  siguiente.addEventListener('click', () => reproductor.irA(1));
+
+  // Flechas desactivadas en los extremos del recorrido
+  function actualizarFlechas(indice: number) {
+    anterior.disabled = indice <= escenas[0] + 0.5;
+    siguiente.disabled = indice >= escenas[escenas.length - 1] - 0.5;
+  }
+  ScrollTrigger.create({ trigger: seccion, start: 'top top', end: 'bottom bottom', onUpdate: ({ progress }) => actualizarFlechas(progress * (total - 1)) });
+  actualizarFlechas(0);
+
   // Saltar a una escena: se desplaza hasta el centro de su rango de frames.
   for (const b of botones) {
     b.addEventListener('click', () => {
+      reproductor.detener();
       const t = tarjetas.find((x) => x.dataset.parada === b.dataset.irA)!;
       const medio = (Number(t.dataset.desde) + Number(t.dataset.hasta)) / 2;
       const y = disparador.start + ((medio - 1) / (total - 1)) * (disparador.end - disparador.start);
