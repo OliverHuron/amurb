@@ -43,18 +43,21 @@ export const sectores = [
 ];
 
 // Revisar: en el sitio de origen, Biocup apuntaba a un CDN de Shopify y SBETech a la
-// misma URL que Galga Hilaturas (probables errores); se dejan sin enlace.
+// misma URL que Galga Hilaturas (probables errores); se dejan sin enlace. DI Central aparece
+// con logo en cruba.com.mx pero sin enlace.
+// Logos: public/brand/marcas/<id>.webp, generados con `node scripts/procesar-marcas.mjs`.
 export const marcas = [
-  { nombre: 'Rayhunters', url: 'https://rayhunters.com.mx/' },
-  { nombre: 'Supralux', url: 'https://supralux.mx/' },
-  { nombre: 'Lirvan', url: 'https://lirvan.com/' },
-  { nombre: 'Polycon', url: 'https://polycon.mx/' },
-  { nombre: 'Poliedro Urbano', url: 'https://poliedrourbano.com/' },
-  { nombre: 'TP-Link', url: null },
-  { nombre: 'Biocup', url: null },
-  { nombre: 'Galga Hilaturas', url: 'https://galgahilaturas.com/' },
-  { nombre: 'SBETech', url: null },
-  { nombre: 'Tinacón', url: 'https://tinacon.com/' },
+  { id: 'rayhunters', nombre: 'RayHunters', url: 'https://rayhunters.com.mx/' },
+  { id: 'supralux', nombre: 'Supralux', url: 'https://supralux.mx/' },
+  { id: 'lirvan', nombre: 'Lirvan', url: 'https://lirvan.com/' },
+  { id: 'polycon', nombre: 'Polycon', url: 'https://polycon.mx/' },
+  { id: 'poliedro-urbano', nombre: 'Poliedro Urbano', url: 'https://poliedrourbano.com/' },
+  { id: 'tp-link', nombre: 'TP-Link', url: null },
+  { id: 'biocup', nombre: 'Biocup', url: null },
+  { id: 'galga-hilaturas', nombre: 'Galga Hilaturas', url: 'https://galgahilaturas.com/' },
+  { id: 'sbetech', nombre: 'SBE Tech', url: null },
+  { id: 'tinacon', nombre: 'Tinacón', url: 'https://tinacon.com/' },
+  { id: 'di-central', nombre: 'DI Central', url: null },
 ];
 
 export const contacto = {

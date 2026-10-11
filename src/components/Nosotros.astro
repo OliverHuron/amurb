@@ -1,49 +1,274 @@
 ---
+// Nosotros (bento asimétrico con brillo que sigue al mouse) y Nuestros valores (columnas numeradas).
+// Los elementos con data-revelar aparecen al entrar en pantalla.
 import { areas, empresa, sectores, valores } from '../data/empresa';
 
-const tarjeta =
-  'rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:border-verde-luz/40 hover:bg-white/[0.05] hover:shadow-[0_0_40px_-12px] hover:shadow-verde-luz/40 sm:p-8';
+// Ícono (trazos de 24×24) por área de suministro
+const iconos: Record<string, string> = {
+  'Materiales de construcción': 'M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 9.7v4.6M9 14.3V19',
+  'Acero y derivados': 'M5 4h14v3h-5v10h5v3H5v-3h5V7H5z',
+  'Hidráulicos y sanitarios': 'M12 3.5s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.9 12 3.5 12 3.5zM9.5 15a2.5 2.5 0 0 0 2.5 2.5',
+  Eléctrico: 'M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z',
+  'CCTV y tecnología': 'M3 8.5 15.5 5l1.8 6.2L4.8 14.7zM9 13.2l1.2 3.8h-4M17 8.5l3.5 1v3.8l-2.6.4',
+  'Textiles y equipo técnico': 'M8.5 3.5 4 6.5l2 4 2-1V20h8V9.5l2 1 2-4-4.5-3c-.8 1.4-2 2-3.5 2s-2.7-.6-3.5-2z',
+};
 ---
 
-<section id="nosotros" aria-labelledby="titulo-nosotros" class="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 sm:py-32">
-  <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Nosotros</p>
-  <h2 id="titulo-nosotros" class="mt-4 max-w-3xl font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-    {empresa.nombre}, {empresa.nombreCompleto}
-  </h2>
-  <p class="mt-6 max-w-3xl text-lg text-white/75">{empresa.quienesSomos}</p>
+<section id="nosotros" aria-labelledby="titulo-nosotros" class="relative mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 sm:py-32" data-nosotros>
+  <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+    <div class="lg:col-span-7" data-revelar>
+      <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Nosotros</p>
+      <h2 id="titulo-nosotros" class="mt-4 font-display text-[clamp(2.2rem,5vw,4rem)] leading-[1.05] font-bold tracking-tight text-balance">
+        {empresa.nombre}, Ambiental y Urbanística de <em class="texto-luz not-italic">Michoacán.</em>
+      </h2>
+    </div>
+    <p class="text-lg text-white/75 lg:col-span-5 lg:pb-2" data-revelar style="--retraso:120ms">{empresa.quienesSomos}</p>
+  </div>
 
   <div class="mt-14 grid gap-4 md:grid-cols-6">
-    <article class:list={[tarjeta, 'md:col-span-4']}>
-      <h3 class="font-display text-xl font-semibold text-verde-luz">Misión</h3>
-      <p class="mt-3 text-white/75">{empresa.mision}</p>
-    </article>
-    <article class:list={[tarjeta, 'md:col-span-2']}>
-      <h3 class="font-display text-xl font-semibold text-verde-luz">Visión</h3>
-      <p class="mt-3 text-white/75">{empresa.vision}</p>
-    </article>
-    <article class:list={[tarjeta, 'md:col-span-3']}>
-      <h3 class="font-display text-xl font-semibold text-ambar">Áreas de suministro</h3>
-      <ul class="mt-4 flex flex-wrap gap-2">
-        {areas.map((a) => <li class="rounded-full border border-white/15 px-3 py-1 text-sm text-white/80">{a}</li>)}
+    <!-- Misión: tarjeta principal -->
+    <article class="tarjeta flex flex-col justify-between gap-8 md:col-span-4 md:row-span-2" data-revelar>
+      <span aria-hidden="true" class="pointer-events-none absolute -top-6 right-6 font-display text-[10rem] leading-none font-bold text-white/[0.04] select-none">“</span>
+      <div>
+        <p class="etiqueta text-verde-luz">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r="1" fill="currentColor" /></svg>
+          Misión
+        </p>
+        <p class="relative mt-6 font-display text-[clamp(1.35rem,2.4vw,1.9rem)] leading-snug font-semibold text-white/90 text-balance">{empresa.mision}</p>
+      </div>
+      <!-- Los tres compromisos que nombra la misión -->
+      <ul class="flex flex-wrap gap-2" aria-label="Compromisos de cada entrega">
+        {
+          ['Seguridad', 'Eficiencia', 'Cumplimiento'].map((c) => (
+            <li class="rounded-full border border-ambar/30 bg-ambar/[0.06] px-4 py-1.5 font-display text-xs font-semibold tracking-[0.15em] text-ambar uppercase">{c}</li>
+          ))
+        }
       </ul>
     </article>
-    <article class:list={[tarjeta, 'md:col-span-3']}>
-      <h3 class="font-display text-xl font-semibold text-ambar">Sectores que atendemos</h3>
-      <ul class="mt-4 space-y-2 text-white/80">
-        {sectores.map((s) => <li class="flex gap-3"><span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-luz" />{s}</li>)}
+
+    <!-- Visión -->
+    <article class="tarjeta md:col-span-2" data-revelar style="--retraso:100ms">
+      <p class="etiqueta text-ambar">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
+        Visión
+      </p>
+      <p class="mt-4 text-white/80">{empresa.vision}</p>
+    </article>
+
+    <!-- Sectores -->
+    <article class="tarjeta md:col-span-2" data-revelar style="--retraso:200ms">
+      <p class="etiqueta text-ambar">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><path d="M12 3 4 6.5v5c0 4.6 3.4 8.4 8 9.5 4.6-1.1 8-4.9 8-9.5v-5z" /><path d="m8.5 12 2.5 2.5 4.5-5" /></svg>
+        Sectores que atendemos
+      </p>
+      <ul class="mt-4 space-y-2.5 text-sm text-white/80">
+        {
+          sectores.map((s, i) => (
+            <li class="flex items-start gap-3">
+              <span aria-hidden="true" class="mt-1.5 size-1.5 shrink-0 rounded-full bg-gradient-to-r from-ambar to-verde-luz" />
+              <span class:list={[i === 0 && 'font-semibold text-white']}>{s}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+
+    <!-- Áreas de suministro: mosaico con íconos -->
+    <article class="tarjeta md:col-span-6" data-revelar style="--retraso:100ms">
+      <p class="etiqueta text-verde-luz">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><path d="M3.5 7.5 12 3l8.5 4.5L12 12zM3.5 7.5v9L12 21l8.5-4.5v-9M12 12v9" /></svg>
+        Áreas de suministro
+      </p>
+      <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {
+          areas.map((a, i) => (
+            <li class="area">
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="size-7 fill-none stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">
+                <defs>
+                  <linearGradient id={`area-g-${i}`} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ffc46b" />
+                    <stop offset="1" stop-color="#9fd36b" />
+                  </linearGradient>
+                </defs>
+                <path d={iconos[a]} stroke={`url(#area-g-${i})`} />
+              </svg>
+              <span class="mt-3 block text-sm font-medium text-white/85">{a}</span>
+            </li>
+          ))
+        }
       </ul>
     </article>
   </div>
 
-  <h3 class="mt-16 font-display text-2xl font-bold">Nuestros valores</h3>
-  <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-    {
-      valores.map((v) => (
-        <li class={tarjeta}>
-          <p class="font-display text-lg font-semibold">{v.nombre}</p>
-          <p class="mt-2 text-sm text-white/70">{v.texto}</p>
-        </li>
-      ))
-    }
-  </ul>
+  <!-- Nuestros valores -->
+  <div class="mt-28" aria-labelledby="titulo-valores" role="group">
+    <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
+      <div>
+        <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Lo que nos define</p>
+        <h3 id="titulo-valores" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] font-bold tracking-tight">
+          Nuestros <em class="texto-luz not-italic">valores.</em>
+        </h3>
+      </div>
+    </div>
+    <ol class="mt-12 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-5">
+      {
+        valores.map((v, i) => (
+          <li class="valor" data-revelar style={`--retraso:${i * 90}ms`}>
+            <span aria-hidden="true" class="numero">{String(i + 1).padStart(2, '0')}</span>
+            <span aria-hidden="true" class="linea-valor" />
+            <p class="mt-6 font-display text-xl font-semibold">{v.nombre}</p>
+            <p class="mt-2 text-sm leading-relaxed text-white/65">{v.texto}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
 </section>
+
+<style>
+  /* Tarjetas del bento: vidrio oscuro, borde que se ilumina y brillo que sigue al mouse (--x, --y) */
+  .tarjeta {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.09);
+    background:
+      radial-gradient(28rem circle at var(--x, 50%) var(--y, -20%), rgb(255 196 107 / 0.09), transparent 60%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.015));
+    padding: 1.75rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  @media (min-width: 640px) {
+    .tarjeta {
+      padding: 2.25rem;
+    }
+  }
+  .tarjeta:hover {
+    border-color: rgb(159 211 107 / 0.35);
+    box-shadow: 0 0 50px -18px rgb(159 211 107 / 0.45);
+  }
+  .etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .area {
+    border-radius: 1rem;
+    border: 1px solid rgb(255 255 255 / 0.07);
+    background: rgb(255 255 255 / 0.025);
+    padding: 1.1rem;
+    transition: border-color 0.25s, background-color 0.25s, transform 0.25s;
+  }
+  .area:hover {
+    border-color: rgb(255 196 107 / 0.4);
+    background: rgb(255 255 255 / 0.05);
+    transform: translateY(-3px);
+  }
+
+  /* Valores: columnas con número grande en contorno y línea de degradado que se llena al pasar el mouse */
+  .valor {
+    position: relative;
+    background: var(--color-noche);
+    padding: 2rem 1.75rem 2.25rem;
+    transition: background-color 0.3s;
+  }
+  .valor:hover {
+    background: #0c1322;
+  }
+  .numero {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 3.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(255 255 255 / 0.25);
+    transition: -webkit-text-stroke-color 0.3s;
+  }
+  .valor:hover .numero {
+    -webkit-text-stroke-color: var(--color-ambar);
+  }
+  .linea-valor {
+    display: block;
+    margin-top: 1.5rem;
+    height: 2px;
+    width: 2.5rem;
+    background: linear-gradient(90deg, var(--color-ambar), var(--color-verde-luz));
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .valor:hover .linea-valor {
+    width: 100%;
+  }
+  /* En celular: número a la izquierda y texto a la derecha (filas más bajas) */
+  @media (max-width: 639px) {
+    .valor {
+      display: grid;
+      grid-template-columns: 3.75rem 1fr;
+      column-gap: 1.25rem;
+      align-items: start;
+      padding: 1.5rem 1.25rem;
+    }
+    .numero {
+      grid-row: span 2;
+      font-size: 2.75rem;
+    }
+    .linea-valor {
+      display: none;
+    }
+    .valor > p:first-of-type {
+      margin-top: 0.25rem;
+    }
+  }
+
+  /* Aparición al entrar en pantalla (solo si el script está activo: sin JS todo se ve) */
+  :global(.revelar-activo) [data-revelar]:not([data-visible]) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  [data-revelar] {
+    transition:
+      opacity 0.8s ease-out var(--retraso, 0ms),
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--retraso, 0ms),
+      border-color 0.3s,
+      box-shadow 0.3s,
+      background-color 0.3s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.revelar-activo) [data-revelar]:not([data-visible]) {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>('[data-nosotros]')!;
+
+  // Aparición escalonada al entrar en pantalla
+  seccion.classList.add('revelar-activo');
+  const observador = new IntersectionObserver(
+    (entradas) => {
+      for (const e of entradas) {
+        if (e.isIntersecting) {
+          (e.target as HTMLElement).dataset.visible = '';
+          observador.unobserve(e.target);
+        }
+      }
+    },
+    { rootMargin: '0px 0px -12% 0px' },
+  );
+  seccion.querySelectorAll('[data-revelar]').forEach((el) => observador.observe(el));
+
+  // Brillo que sigue al mouse dentro de cada tarjeta
+  seccion.addEventListener('pointermove', (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('.tarjeta');
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    t.style.setProperty('--x', `${e.clientX - r.left}px`);
+    t.style.setProperty('--y', `${e.clientY - r.top}px`);
+  });
+</script>

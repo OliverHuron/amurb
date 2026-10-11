@@ -1,36 +1,284 @@
 ---
+// Carrusel infinito de marcas: la central crece y se ve a color; las demás, en gris y atenuadas.
+// Se repite la lista 3 veces para el bucle; solo la copia del centro es accesible.
 import { marcas } from '../data/empresa';
+
+const copias = [0, 1, 2];
 ---
 
-<section id="marcas" aria-labelledby="titulo-marcas" class="border-t border-white/5">
-  <div class="mx-auto max-w-7xl scroll-mt-20 px-5 py-24 sm:px-8 sm:py-28">
+<section id="marcas" aria-labelledby="titulo-marcas" class="relative overflow-hidden border-t border-white/5" data-marcas>
+  <div aria-hidden="true" class="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[28rem] w-[60rem] max-w-full -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_196_107/0.10),rgb(159_211_107/0.05),transparent)]"></div>
+
+  <div class="mx-auto max-w-7xl scroll-mt-20 px-5 pt-24 sm:px-8 sm:pt-32">
     <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Marcas</p>
-    <h2 id="titulo-marcas" class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Marcas con las que trabajamos</h2>
-    <p class="mt-4 max-w-2xl text-white/70">
-      Distribuimos y suministramos productos de fabricantes reconocidos en alumbrado, mobiliario urbano,
-      redes, hidráulica y equipo técnico.
+    <h2 id="titulo-marcas" class="mt-4 max-w-3xl font-display text-[clamp(2.2rem,5vw,4rem)] leading-[1.05] font-bold tracking-tight text-balance">
+      Fabricantes que <em class="texto-luz not-italic">respaldan cada entrega.</em>
+    </h2>
+    <p class="mt-6 max-w-2xl text-lg text-white/70">
+      Distribuimos y suministramos productos de fabricantes reconocidos en alumbrado, mobiliario urbano, redes,
+      hidráulica y equipo técnico.
     </p>
-    <ul class="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+  </div>
+
+  <div
+    class="carrusel relative mt-16 py-10 select-none"
+    role="region"
+    aria-roledescription="carrusel"
+    aria-label="Marcas con las que trabajamos"
+    data-carrusel
+  >
+    <ul class="pista flex w-max gap-6 sm:gap-8" data-pista>
       {
-        marcas.map((m) => (
-          <li>
-            {m.url ? (
-              <a
-                href={m.url}
-                target="_blank"
-                rel="noopener"
-                class="flex h-24 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-center font-display text-lg font-semibold text-white/85 transition hover:border-verde-luz/40 hover:text-white hover:shadow-[0_0_40px_-12px] hover:shadow-verde-luz/40"
-              >
-                {m.nombre}
-              </a>
-            ) : (
-              <span class="flex h-24 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-center font-display text-lg font-semibold text-white/85">
-                {m.nombre}
-              </span>
-            )}
-          </li>
-        ))
+        copias.map((copia) =>
+          marcas.map((m, i) => {
+            const clon = copia !== 1;
+            const contenido = (
+              <img
+                src={`/brand/marcas/${m.id}.webp`}
+                alt={clon ? '' : m.nombre}
+                width="400"
+                height="180"
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+                class="max-h-full max-w-full object-contain"
+              />
+            );
+            return (
+              <li class="tarjeta" data-indice={i} data-activo="false" aria-hidden={clon ? 'true' : undefined}>
+                {m.url ? (
+                  <a href={m.url} target="_blank" rel="noopener" tabindex={clon ? -1 : undefined} aria-label={clon ? undefined : `${m.nombre} (abre su sitio)`} class="marco">
+                    {contenido}
+                  </a>
+                ) : (
+                  <span class="marco">{contenido}</span>
+                )}
+              </li>
+            );
+          }),
+        )
       }
     </ul>
   </div>
+
+  <!-- Marca central + controles -->
+  <div class="mx-auto flex max-w-7xl flex-col items-center gap-6 px-5 pb-24 sm:px-8 sm:pb-32">
+    <p class="h-8 font-display text-xl font-semibold tracking-tight" data-nombre aria-hidden="true">{marcas[0].nombre}</p>
+    <div class="flex items-center gap-3">
+      <button type="button" class="control" data-anterior aria-label="Marca anterior">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-2"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <button type="button" class="control" data-pausa aria-label="Pausar el carrusel" aria-pressed="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="icono-pausa size-4 fill-current"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="icono-play ml-0.5 hidden size-4 fill-current"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5Z" /></svg>
+      </button>
+      <button type="button" class="control" data-siguiente aria-label="Marca siguiente">
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-2"><path d="M9 5l7 7-7 7" /></svg>
+      </button>
+    </div>
+  </div>
 </section>
+
+<style>
+  /* Bordes difuminados: las marcas aparecen y se van suavemente */
+  .carrusel {
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  }
+  .pista {
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .tarjeta {
+    flex: none;
+    width: 11rem;
+    height: 6.5rem;
+    transform: scale(0.84);
+    opacity: 0.45;
+    filter: grayscale(1);
+    transition:
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.5s,
+      filter 0.5s;
+  }
+  @media (min-width: 640px) {
+    .tarjeta {
+      width: 15rem;
+      height: 8.5rem;
+    }
+  }
+  .marco {
+    position: relative;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+    padding: 1.1rem 1.4rem;
+    background: #f5f3ee;
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.6);
+    cursor: pointer;
+  }
+  /* La marca central: más grande, a color y con halo ámbar → verde */
+  .tarjeta[data-activo='true'] {
+    transform: scale(1.22);
+    opacity: 1;
+    filter: none;
+  }
+  .tarjeta[data-activo='true'] .marco {
+    box-shadow:
+      0 0 0 2px rgb(255 196 107 / 0.9),
+      0 0 0 5px rgb(159 211 107 / 0.25),
+      0 20px 60px -10px rgb(255 196 107 / 0.45);
+  }
+  .tarjeta:not([data-activo='true']):hover {
+    opacity: 0.75;
+  }
+  /* Al dar la vuelta al bucle se salta a otra copia sin animación */
+  .sin-transicion,
+  .sin-transicion .tarjeta {
+    transition: none !important;
+  }
+  .control {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.15);
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .control:hover {
+    border-color: var(--color-ambar);
+    background: rgb(255 255 255 / 0.08);
+  }
+  [aria-pressed='true'] .icono-pausa {
+    display: none;
+  }
+  [aria-pressed='true'] .icono-play {
+    display: block;
+  }
+</style>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>('[data-marcas]')!;
+  const carrusel = seccion.querySelector<HTMLElement>('[data-carrusel]')!;
+  const pista = seccion.querySelector<HTMLElement>('[data-pista]')!;
+  const tarjetas = [...pista.querySelectorAll<HTMLElement>('.tarjeta')];
+  const nombre = seccion.querySelector<HTMLElement>('[data-nombre]')!;
+  const botonPausa = seccion.querySelector<HTMLButtonElement>('[data-pausa]')!;
+  const n = tarjetas.length / 3;
+  const nombres = tarjetas.slice(n, 2 * n).map((t) => t.querySelector('img')!.alt);
+  const INTERVALO = 2600;
+
+  let actual = n; // primera marca de la copia del centro
+
+  function posicionar(animar: boolean) {
+    const t = tarjetas[actual];
+    const x = carrusel.clientWidth / 2 - (t.offsetLeft + t.offsetWidth / 2);
+    if (!animar) pista.classList.add('sin-transicion');
+    pista.style.transform = `translate3d(${x}px, 0, 0)`;
+    tarjetas.forEach((el, k) => (el.dataset.activo = String(k === actual)));
+    nombre.textContent = nombres[actual % n];
+    if (!animar) {
+      void pista.offsetWidth; // aplica la posición antes de reactivar las transiciones
+      pista.classList.remove('sin-transicion');
+    }
+  }
+
+  function ir(destino: number) {
+    actual = destino;
+    posicionar(true);
+  }
+
+  // Bucle infinito: al terminar la animación, si salió de la copia del centro, vuelve a ella sin animar.
+  pista.addEventListener('transitionend', (e) => {
+    if (e.target !== pista || e.propertyName !== 'transform') return;
+    if (actual < n || actual >= 2 * n) {
+      actual = n + (((actual % n) + n) % n);
+      posicionar(false);
+    }
+  });
+
+  // Reproducción automática: se pausa con el botón, al pasar el mouse o con el foco dentro.
+  let pausadoPorUsuario = false;
+  let encima = false;
+  let visible = false;
+  let reloj = 0;
+  function programar() {
+    clearInterval(reloj);
+    if (!pausadoPorUsuario && !encima && visible && !document.hidden) reloj = window.setInterval(() => ir(actual + 1), INTERVALO);
+  }
+  carrusel.addEventListener('pointerenter', (e) => {
+    if (e.pointerType === 'mouse') {
+      encima = true;
+      programar();
+    }
+  });
+  carrusel.addEventListener('pointerleave', () => {
+    encima = false;
+    programar();
+  });
+  seccion.addEventListener('focusin', () => {
+    encima = true;
+    programar();
+  });
+  seccion.addEventListener('focusout', () => {
+    encima = false;
+    programar();
+  });
+  document.addEventListener('visibilitychange', programar);
+  botonPausa.addEventListener('click', () => {
+    pausadoPorUsuario = !pausadoPorUsuario;
+    botonPausa.setAttribute('aria-pressed', String(pausadoPorUsuario));
+    botonPausa.setAttribute('aria-label', pausadoPorUsuario ? 'Reanudar el carrusel' : 'Pausar el carrusel');
+    programar();
+  });
+
+  seccion.querySelector('[data-anterior]')!.addEventListener('click', () => {
+    ir(actual - 1);
+    programar();
+  });
+  seccion.querySelector('[data-siguiente]')!.addEventListener('click', () => {
+    ir(actual + 1);
+    programar();
+  });
+
+  // Clic en una marca lateral: la centra (la central sí abre su sitio). Deslizar con el dedo o el mouse: cambia.
+  let inicioX = 0;
+  let arrastrando = false;
+  let arrastro = false;
+  carrusel.addEventListener('pointerdown', (e) => {
+    inicioX = e.clientX;
+    arrastrando = true;
+    arrastro = false;
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!arrastrando) return;
+    arrastrando = false;
+    const dx = e.clientX - inicioX;
+    if (Math.abs(dx) > 40) {
+      arrastro = true;
+      ir(actual + (dx < 0 ? 1 : -1));
+      programar();
+    }
+  });
+  tarjetas.forEach((t, k) =>
+    t.addEventListener('click', (e) => {
+      if (arrastro || k !== actual) e.preventDefault();
+      if (!arrastro && k !== actual) {
+        ir(k);
+        programar();
+      }
+    }),
+  );
+
+  // Arranca cuando la sección se ve (no gasta animaciones fuera de pantalla)
+  posicionar(false);
+  window.addEventListener('resize', () => posicionar(false));
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    programar();
+  }).observe(carrusel);
+</script>
