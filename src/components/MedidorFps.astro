@@ -40,6 +40,9 @@
         let texto = `${tiempos.length} fps · p95 ${peor.toFixed(0)} ms · tirones ${tirones}`;
         if (s) {
           texto += `\nsalto ${avanceMax.toFixed(2)} · aprox ${s.aproximados - aproxPrevio} · rueda ${rueda.eventos}/s Δ${Math.round(rueda.delta)} m${rueda.modo}`;
+          const w = window as unknown as { secuenciaRecorrido?: { mbps: number }; reproductorRecorrido?: { ultimaMaxima: number; estado: string } };
+          const r = w.reproductorRecorrido;
+          if (r) texto += `\nplay ${r.estado} · vel ${Math.round(r.ultimaMaxima)} img/s · red ${(w.secuenciaRecorrido?.mbps ?? 0).toFixed(0)} Mbps`;
           aproxPrevio = s.aproximados;
         }
         caja.textContent = texto;

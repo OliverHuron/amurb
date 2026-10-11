@@ -42,6 +42,10 @@ export class SecuenciaFrames {
   private readonly atras: number;
   /** Estadísticas para pruebas (/?fps): cuadros pintados con el frame exacto vs. con uno aproximado. */
   readonly estadisticas = { exactos: 0, aproximados: 0, ultimoPintado: 0 };
+  // Velocidad real de descarga (para adaptar la reproducción automática): bytes y tiempo con descargas activas.
+  private bytesRed = 0;
+  private msRed = 0;
+  private inicioTramoRed = 0;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -225,11 +229,14 @@ export class SecuenciaFrames {
 
   private async descargar(i: number) {
     if (this.blobs[i] || this.descargando.has(i)) return;
+    if (this.descargando.size === 0) this.inicioTramoRed = performance.now();
     this.descargando.add(i);
     try {
       const r = await fetch(this.urlFrame(i));
       if (!r.ok) return;
       this.blobs[i] = await r.blob();
+      this.bytesRed += this.blobs[i]!.size;
+      if (this.descargando.size === 1) this.msRed += performance.now() - this.inicioTramoRed; // termina un tramo
       if (!this.anchoFrame) {
         const bmp = await createImageBitmap(this.blobs[i]!);
         this.anchoFrame = bmp.width;
@@ -244,6 +251,24 @@ export class SecuenciaFrames {
     } finally {
       this.descargando.delete(i);
     }
+  }
+
+  /**
+   * Megabits por segundo medidos con las descargas de esta secuencia (0 mientras no haya datos
+   * suficientes). Mide el tiempo en que hubo descargas activas, no el tiempo total de la página.
+   */
+  get mbps() {
+    // incluye el tramo en curso: con descargas continuas, el tramo no termina hasta el final
+    const ms = this.msRed + (this.descargando.size > 0 ? performance.now() - this.inicioTramoRed : 0);
+    return this.bytesRed > 1_000_000 && ms > 0 ? (this.bytesRed * 8) / (ms / 1000) / 1e6 : 0;
+  }
+
+  /** Cuántos de los `n` frames siguientes (en `sentido`) ya están descargados, sin huecos, desde `i`. */
+  descargadosDesde(i: number, n: number, sentido: number) {
+    const paso = sentido < 0 ? -1 : 1;
+    let k = 0;
+    for (let j = Math.round(i); k < n && j >= 0 && j < this.total && this.blobs[j]; j += paso) k++;
+    return k;
   }
 
   /** Descarga el primer frame y luego uno de cada `salto` (cobertura rápida) y el resto, en paralelo. */

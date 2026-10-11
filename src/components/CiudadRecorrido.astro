@@ -295,12 +295,34 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   const conProductos = tarjetas.filter((t) => t.querySelector('ul')).map(centro);
   const escenas = [0, ...conProductos, total - 1];
 
+  // Velocidad de reproducción y flechas según el equipo: más rápida con buen internet, RAM y procesador.
+  // La red se mide con las propias descargas del recorrido (iPhone/Safari no informan red ni RAM).
+  const LENTA = 42;
+  function velocidadEquipo() {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean; downlink?: number } };
+    if (nav.connection?.saveData) return LENTA;
+    const red = secuencia.mbps || nav.connection?.downlink || 0; // Mbps (downlink de Chrome llega topado a 10)
+    const ram = nav.deviceMemory ?? 4; // GB (Chrome lo topa en 8; sin dato se asume un equipo medio)
+    const nucleos = navigator.hardwareConcurrency || 4;
+    if (red >= 20 && ram >= 8 && nucleos >= 8) return 90;
+    if (red >= 8 && ram >= 4 && nucleos >= 4) return 65;
+    return LENTA;
+  }
+  // Freno en vivo: si las imágenes del tramo que viene (~1,2 s) aún no llegan, se avanza a la velocidad segura.
+  function velocidad(posicion: number, sentido: number) {
+    const deseada = velocidadEquipo();
+    const listos = secuencia.descargadosDesde(posicion, Math.ceil(deseada * 1.2), sentido);
+    if (listos >= Math.ceil(deseada * 1.2)) return deseada;
+    return listos >= 20 ? LENTA : 25;
+  }
+
   const reproductor = new Reproductor({
     total,
     aScroll,
     indiceActual: () => disparador.progress * (total - 1),
     escenas,
     pausas: conProductos,
+    velocidad,
     alMover: () => ScrollTrigger.update(),
     alCambiarEstado: (estado) => {
       botonPlay.dataset.estado = estado;

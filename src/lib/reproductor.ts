@@ -19,14 +19,19 @@ interface Opciones {
   /** Tras mover el scroll, en el mismo cuadro (ScrollTrigger.update). */
   alMover: () => void;
   alCambiarEstado: (estado: Estado) => void;
-  /** Frames por segundo de avance. */
-  velocidad?: number;
+  /**
+   * Frames por segundo de avance; se consulta en cada cuadro, así puede subir en equipos rápidos y
+   * bajar si las imágenes del tramo que viene aún no llegan (recibe la posición y el sentido).
+   */
+  velocidad?: (posicion: number, sentido: number) => number;
   /** Segundos de pausa en cada escena de producto. */
   pausa?: number;
 }
 
 export class Reproductor {
   estado: Estado = 'detenido';
+  /** Velocidad máxima usada en el último cuadro (para el medidor ?fps). */
+  ultimaMaxima = 0;
   private posicion = 0;
   private velocidadActual = 0;
   private destino = 0;
@@ -34,14 +39,12 @@ export class Reproductor {
   private pausadas = new Set<number>();
   private ultimoTick = 0;
   private ultimoScroll = -1;
-  private readonly velocidad: number;
+  private readonly velocidad: (posicion: number, sentido: number) => number;
   private readonly pausa: number;
-  private readonly aceleracion: number;
 
   constructor(private o: Opciones) {
-    this.velocidad = o.velocidad ?? 42;
+    this.velocidad = o.velocidad ?? (() => 42);
     this.pausa = o.pausa ?? 3;
-    this.aceleracion = this.velocidad / 0.45; // arranca y frena en ~0,45 s
     // El usuario toma el control: rueda, touch o teclas de desplazamiento detienen la reproducción.
     const tomarControl = () => this.estado !== 'detenido' && this.detener();
     window.addEventListener('wheel', tomarControl, { passive: true, capture: true });
@@ -125,8 +128,15 @@ export class Reproductor {
       if (p !== undefined) parada = p;
     }
     const distancia = Math.abs(parada - this.posicion);
-    // velocidad constante con arranque y frenado suaves: v ≤ √(2·a·d) para llegar justo a la parada
-    this.velocidadActual = Math.min(this.velocidad, this.velocidadActual + this.aceleracion * dt, Math.sqrt(2 * this.aceleracion * distancia) + 0.5);
+    // velocidad constante con arranque y frenado suaves (~0,45 s): v ≤ √(2·a·d) para llegar justo a la parada
+    const maxima = this.velocidad(this.posicion, sentido);
+    this.ultimaMaxima = maxima;
+    const aceleracion = Math.max(maxima, 42) / 0.45;
+    const frenando = this.velocidadActual > maxima;
+    this.velocidadActual = Math.min(
+      frenando ? Math.max(maxima, this.velocidadActual - aceleracion * dt) : Math.min(maxima, this.velocidadActual + aceleracion * dt),
+      Math.sqrt(2 * aceleracion * distancia) + 0.5,
+    );
     const paso = this.velocidadActual * dt;
 
     if (paso >= distancia) {
