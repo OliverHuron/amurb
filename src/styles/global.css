@@ -35,3 +35,13 @@
     border-radius: 4px;
   }
 }
+
+@layer components {
+  /* Palabra destacada de los titulares (hero y recorrido): degradado ámbar → verde */
+  .texto-luz {
+    background: linear-gradient(90deg, var(--color-ambar), #fff1d6 50%, var(--color-verde-luz));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}

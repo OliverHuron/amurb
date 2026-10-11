@@ -17,6 +17,8 @@ export interface Parada {
   hasta: number;
   etiqueta: string;
   titulo: string;
+  /** Final del titular, con el degradado de marca (como "México." en el hero). */
+  destacado: string;
   texto: string;
   productos: string[];
 }
@@ -32,55 +34,55 @@ function aIndices(desde: number, hasta: number) {
 const definiciones: (Omit<Parada, 'desde' | 'hasta'> & { rango: [number, number] })[] = [
   {
     id: 'ciudad', rango: [1, 35], etiqueta: 'Soluciones',
-    titulo: 'Todo lo que una ciudad necesita',
+    titulo: 'Todo lo que una ciudad', destacado: 'necesita.',
     texto: 'Recorre cómo nuestros productos mejoran calles, plazas y servicios urbanos.',
     productos: [],
   },
   {
     id: 'alumbrado', rango: [80, 120], etiqueta: 'Alumbrado',
-    titulo: 'Alumbrado público y solar',
+    titulo: 'Alumbrado público', destacado: 'y solar.',
     texto: 'Iluminación eficiente para avenidas, camellones y banquetas.',
     productos: ['Luminarias con panel solar', 'Faroles de hierro', 'Luminarias LED'],
   },
   {
     id: 'vialidad', rango: [140, 175], etiqueta: 'Vialidad',
-    titulo: 'Seguridad vial',
+    titulo: 'Seguridad', destacado: 'vial.',
     texto: 'Confinamiento y orden del tránsito en cruces y carriles.',
     productos: ['Bolardo divisor trapezoidal 120-15-9.5', 'Señalamiento horizontal'],
   },
   {
     id: 'alcantarillado', rango: [185, 220], etiqueta: 'Alcantarillado',
-    titulo: 'Alcantarillado',
+    titulo: 'Alcantarillado', destacado: 'pluvial.',
     texto: 'Registro y drenaje pluvial resistentes al tráfico urbano.',
     productos: ['Brocal con tapa para pozo de visita', 'Coladeras pluviales de hierro'],
   },
   {
     id: 'parabuses', rango: [240, 278], etiqueta: 'Parabuses',
-    titulo: 'Parabuses',
+    titulo: 'Parabuses', destacado: 'a tu medida.',
     texto: 'Personalizables con celosía, logotipos y alumbrado. Diseños inclusivos.',
     productos: ['Parabús Elle', 'Parabús Contempo', 'Bancas y botes'],
   },
   {
     id: 'cctv', rango: [298, 335], etiqueta: 'CCTV',
-    titulo: 'Videovigilancia',
+    titulo: 'Videovigilancia', destacado: 'urbana.',
     texto: 'Cruces y espacios públicos más seguros, conectados a centros de monitoreo.',
     productos: ['Postes de videovigilancia', 'Domo PTZ y cámaras bala', 'Botón de pánico y altavoz'],
   },
   {
     id: 'tinacos', rango: [368, 402], etiqueta: 'Hidráulicos',
-    titulo: 'Almacenamiento de agua',
+    titulo: 'Almacenamiento', destacado: 'de agua.',
     texto: 'Soluciones hidráulicas y sanitarias para viviendas y edificios.',
     productos: ['Tinacos', 'Hidráulicos y sanitarios'],
   },
   {
     id: 'plaza', rango: [440, 478], etiqueta: 'Espacio público',
-    titulo: 'Plazas y jardines',
+    titulo: 'Plazas y', destacado: 'jardines.',
     texto: 'Mobiliario urbano que hace los espacios públicos más habitables.',
     productos: ['Faroles de hierro', 'Bancas urbanas', 'Botes y jardineras'],
   },
   {
     id: 'final', rango: [505, 540], etiqueta: 'AmUrb',
-    titulo: 'Infraestructura que transforma ciudades',
+    titulo: 'Infraestructura que transforma', destacado: 'ciudades.',
     texto: 'Ambiental y Urbanística de Michoacán: suministro integral para gobierno, defensa e iniciativa privada.',
     productos: [],
   },
