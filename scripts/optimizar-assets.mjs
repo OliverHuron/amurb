@@ -3,7 +3,7 @@
 //   logo_ambiental.png                -> public/brand/logo-claro.webp (versión para fondos oscuros)
 // Uso: node scripts/optimizar-assets.mjs            (logo + frames)
 //      node scripts/optimizar-assets.mjs --solo-logo
-import { mkdir, readdir } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -135,17 +135,34 @@ async function crearFavicon(logo) {
     .png()
     .toBuffer();
 
-  for (const [lado, archivo] of [[64, 'favicon.png'], [180, 'apple-touch-icon.png']]) {
+  // Google pide favicons cuadrados de un múltiplo de 48 px; /favicon.ico lo piden muchos robots por defecto.
+  const icono = async (lado) => {
     const interior = Math.round(lado * 0.84);
     const marca = await sharp(monograma)
       .resize(interior, interior, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();
     const borde = Math.round((lado - interior) / 2);
-    await sharp({ create: { width: lado, height: lado, channels: 4, background: '#070b14' } })
+    return sharp({ create: { width: lado, height: lado, channels: 4, background: '#070b14' } })
       .composite([{ input: marca, left: borde, top: borde }])
       .png()
-      .toFile(path.join(RAIZ, 'public', archivo));
+      .toBuffer();
+  };
+  for (const [lado, archivo] of [[96, 'favicon.png'], [180, 'apple-touch-icon.png']]) {
+    await writeFile(path.join(RAIZ, 'public', archivo), await icono(lado));
   }
+  // ICO con un PNG de 48 px dentro (formato válido desde Windows Vista y en todos los navegadores)
+  const png48 = await icono(48);
+  const cabecera = Buffer.alloc(22);
+  cabecera.writeUInt16LE(0, 0); // reservado
+  cabecera.writeUInt16LE(1, 2); // tipo: icono
+  cabecera.writeUInt16LE(1, 4); // una imagen
+  cabecera.writeUInt8(48, 6); // ancho
+  cabecera.writeUInt8(48, 7); // alto
+  cabecera.writeUInt16LE(1, 10); // planos
+  cabecera.writeUInt16LE(32, 12); // bits por píxel
+  cabecera.writeUInt32LE(png48.length, 14); // tamaño de la imagen
+  cabecera.writeUInt32LE(22, 18); // desplazamiento de la imagen
+  await writeFile(path.join(RAIZ, 'public', 'favicon.ico'), Buffer.concat([cabecera, png48]));
 }
 
 await procesarLogo();
