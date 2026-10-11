@@ -1,48 +1,137 @@
 ---
+// Contacto con la misma tipografía y tarjetas que Nosotros/Marcas, más el pie de página.
 import { contacto, empresa } from '../data/empresa';
 
 const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contacto.direccion)}`;
 const anio = new Date().getFullYear();
 ---
 
-<section id="contacto" aria-labelledby="titulo-contacto" class="border-t border-white/5">
-  <div class="mx-auto grid max-w-7xl scroll-mt-20 gap-10 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-2">
-    <div>
+<section id="contacto" aria-labelledby="titulo-contacto" class="relative overflow-hidden border-t border-white/5" data-contacto>
+  <div aria-hidden="true" class="pointer-events-none absolute -bottom-40 left-1/2 -z-10 h-[30rem] w-[70rem] max-w-full -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_196_107/0.10),rgb(159_211_107/0.05),transparent)]"></div>
+
+  <div class="mx-auto grid max-w-7xl scroll-mt-20 gap-12 px-5 py-24 sm:px-8 sm:py-32 lg:grid-cols-12 lg:items-end">
+    <div class="lg:col-span-7" data-revelar>
       <p class="font-display text-xs font-semibold tracking-[0.35em] text-ambar uppercase">Contacto</p>
-      <h2 id="titulo-contacto" class="mt-4 font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-        Hablemos de tu proyecto
+      <h2 id="titulo-contacto" class="mt-4 font-display text-[clamp(2.4rem,6vw,5rem)] leading-[1.03] font-bold tracking-tight text-balance">
+        Hablemos de tu <em class="texto-luz not-italic">proyecto.</em>
       </h2>
-      <p class="mt-4 max-w-xl text-white/70">
+      <p class="mt-6 max-w-xl text-lg text-white/75">
         Cotiza alumbrado público, mobiliario urbano, seguridad vial, CCTV y suministro de materiales para tu
         municipio, dependencia o empresa.
       </p>
       <a
         href={contacto.telefonoHref}
-        class="mt-8 inline-flex rounded-full bg-ambar px-6 py-3 font-semibold text-noche transition hover:bg-white"
+        class="mt-10 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-ambar to-verde-luz px-7 py-3.5 font-display font-semibold text-noche shadow-[0_0_40px_-8px] shadow-ambar/60 transition hover:scale-[1.03] active:scale-[0.98]"
       >
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
         Llamar al {contacto.telefono}
       </a>
     </div>
 
-    <address class="grid gap-4 not-italic sm:grid-cols-2 lg:grid-cols-1">
-      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-        <p class="text-sm font-semibold tracking-wider text-white/50 uppercase">Teléfono</p>
-        <a href={contacto.telefonoHref} class="mt-2 block font-display text-2xl font-semibold hover:text-ambar">{contacto.telefono}</a>
+    <address class="grid gap-4 not-italic sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+      <div class="tarjeta" data-revelar style="--retraso:100ms">
+        <p class="etiqueta text-verde-luz">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
+          Teléfono
+        </p>
+        <a href={contacto.telefonoHref} class="mt-4 block font-display text-3xl font-bold tracking-tight transition-colors hover:text-ambar">{contacto.telefono}</a>
       </div>
-      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-        <p class="text-sm font-semibold tracking-wider text-white/50 uppercase">Oficinas</p>
-        <p class="mt-2 text-lg">{contacto.direccion}</p>
-        <a href={mapa} target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-semibold text-verde-luz hover:underline">
-          Ver en el mapa →
+      <div class="tarjeta" data-revelar style="--retraso:200ms">
+        <p class="etiqueta text-ambar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="size-5 fill-none stroke-current stroke-[1.8]"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+          Oficinas
+        </p>
+        <p class="mt-4 text-lg text-white/85">{contacto.direccion}</p>
+        <a href={mapa} target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-verde-luz transition-colors hover:text-white">
+          Ver en el mapa
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="size-4 fill-none stroke-current stroke-2"><path d="M7 17 17 7M9 7h8v8" /></svg>
         </a>
       </div>
     </address>
   </div>
 
   <footer class="border-t border-white/5">
-    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-8 text-sm text-white/50 sm:flex-row sm:justify-between sm:px-8">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <a href="/" class="flex items-center gap-3" aria-label="AmUrb, ir al inicio">
+        <img src="/brand/logo-claro.webp" alt="" width="593" height="210" loading="lazy" decoding="async" class="h-9 w-auto opacity-80" />
+      </a>
       <p>© {anio} {empresa.nombre} · {empresa.nombreCompleto}</p>
       <p>Morelia, Michoacán, México</p>
     </div>
   </footer>
 </section>
+
+<style>
+  /* Mismas tarjetas que Nosotros: vidrio oscuro, borde que se ilumina y brillo que sigue al mouse */
+  .tarjeta {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.09);
+    background:
+      radial-gradient(24rem circle at var(--x, 50%) var(--y, -20%), rgb(255 196 107 / 0.09), transparent 60%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.015));
+    padding: 1.75rem;
+  }
+  @media (min-width: 640px) {
+    .tarjeta {
+      padding: 2.25rem;
+    }
+  }
+  .tarjeta:hover {
+    border-color: rgb(159 211 107 / 0.35);
+    box-shadow: 0 0 50px -18px rgb(159 211 107 / 0.45);
+  }
+  .etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  :global(.revelar-activo) [data-revelar]:not([data-visible]) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  [data-revelar] {
+    transition:
+      opacity 0.8s ease-out var(--retraso, 0ms),
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--retraso, 0ms),
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.revelar-activo) [data-revelar]:not([data-visible]) {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>('[data-contacto]')!;
+
+  seccion.classList.add('revelar-activo');
+  const observador = new IntersectionObserver(
+    (entradas) => {
+      for (const e of entradas) {
+        if (e.isIntersecting) {
+          (e.target as HTMLElement).dataset.visible = '';
+          observador.unobserve(e.target);
+        }
+      }
+    },
+    { rootMargin: '0px 0px -8% 0px' },
+  );
+  seccion.querySelectorAll('[data-revelar]').forEach((el) => observador.observe(el));
+
+  seccion.addEventListener('pointermove', (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('.tarjeta');
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    t.style.setProperty('--x', `${e.clientX - r.left}px`);
+    t.style.setProperty('--y', `${e.clientY - r.top}px`);
+  });
+</script>
