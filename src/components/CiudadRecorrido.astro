@@ -277,9 +277,12 @@ import { RECORRIDO, paradas } from '../data/recorrido';
   actualizar(1);
 
   // Rueda del mouse con pasos cortos y continuos dentro del recorrido (como las flechas del teclado).
+  // Con el dedo, límite más estricto que en el hero: aquí hay ~3 veces más imágenes por pixel de scroll.
   ruedaSuave({
     rango: () => ({ inicio: disparador.start, fin: disparador.end }),
     alMover: () => ScrollTrigger.update(),
+    factorDedo: 0.3,
+    inerciaMaxima: 0.15,
   });
 
   // ---------- Reproducción automática y flechas ----------

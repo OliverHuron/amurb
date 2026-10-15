@@ -109,7 +109,12 @@ export function ruedaSuave({ rango, factor = 0.55, suavizado = 0.32, factorDedo 
       const p = e.touches[0];
       previo = { x: p.clientX, y: p.clientY, t: e.timeStamp };
       velocidad = 0;
-      gesto = null;
+      // Dentro del tramo (lejos de sus bordes) el gesto se toma desde ya: en iPhone, si el primer
+      // touchmove no se cancela, Safari arranca su scroll nativo y ya no deja cancelar el resto.
+      // En un borde se decide con el primer movimiento (puede ser un gesto para salir).
+      const { inicio, fin } = rango();
+      const base = animando ? objetivo : window.scrollY;
+      gesto = base > inicio + 2 && base < fin - 2 ? true : base >= inicio - 1 && base <= fin + 1 ? null : false;
     },
     { passive: true },
   );
@@ -122,9 +127,9 @@ export function ruedaSuave({ rango, factor = 0.55, suavizado = 0.32, factorDedo 
       const dy = previo.y - p.clientY; // arrastrar hacia arriba = avanzar
       const dx = previo.x - p.clientX;
       if (gesto === null) {
-        if (Math.abs(dy) < 2 && Math.abs(dx) < 2) return;
-        // gestos horizontales (carruseles) o que salen del tramo: scroll nativo
-        gesto = Math.abs(dy) > Math.abs(dx) && controla(Math.sign(dy));
+        // en un borde del tramo: si va hacia afuera (o es horizontal), scroll nativo
+        if (dy === 0 && dx === 0) return;
+        gesto = Math.abs(dy) >= Math.abs(dx) && controla(Math.sign(dy) || 1);
         if (!gesto) return;
       }
       if (!e.cancelable) return;
