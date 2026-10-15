@@ -30,7 +30,7 @@ jobs:
         run: |
           rsync -a --delete \
             --exclude '.git' --exclude 'node_modules' --exclude 'dist' \
-            --exclude '.env' --exclude 'blender' --exclude 'desktop_frames' --exclude 'public/recorrido' \
+            --exclude '.env' --exclude 'blender' --exclude 'desktop_frames' --exclude 'public/recorrido' --exclude 'public/hero' \
             ./ "$APP_DIR/"
 
       - name: Instalar dependencias y compilar

@@ -26,6 +26,11 @@ blender/modelos/
 # frames del recorrido (73 MB): se suben aparte al servidor, no van en git
 public/recorrido/
 
+# hero: video original de dron (170 MB) y sus frames (61 MB), se suben aparte al servidor
+*.MP4
+*.mp4
+public/hero/
+
 # caché de Python
 __pycache__/
 *.pyc

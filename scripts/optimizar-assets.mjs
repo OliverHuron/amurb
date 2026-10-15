@@ -1,4 +1,5 @@
-// Genera los assets web a partir de los originales (que no se modifican):
+// Genera los assets web a partir de los originales (que no se modifican).
+// OJO: el hero ya NO usa public/frames (parque); desde 2026-10-15 usa scripts/optimizar-hero.mjs (toma de dron).
 //   desktop_frames/*.webp (5120x2880) -> public/frames/desktop (1920x1080) y public/frames/mobile (720x1280)
 //   logo_ambiental.png                -> public/brand/logo-claro.webp (versión para fondos oscuros)
 // Uso: node scripts/optimizar-assets.mjs            (logo + frames)

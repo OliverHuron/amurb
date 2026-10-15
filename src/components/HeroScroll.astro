@@ -1,13 +1,16 @@
 ---
 // Hero con secuencia de imágenes controlada por el scroll (GSAP + ScrollTrigger).
-// Los frames se generan con `npm run assets` en public/frames/{desktop,mobile}.
+// Toma de dron de una plaza iluminada (toma10.MP4, segundos 4–15). Los frames se generan con
+// `node scripts/optimizar-hero.mjs` en public/hero/{desktop,mobile} (fuera de git; en el servidor
+// viven en /var/www/amurb-media/hero).
 import { empresa } from '../data/empresa';
+import hero from '../data/hero.json';
 
 const FRAMES = {
-  desktop: { ruta: '/frames/desktop/', total: 180 },
-  mobile: { ruta: '/frames/mobile/', total: 90 },
+  desktop: { ruta: '/hero/desktop/', total: hero.desktop },
+  mobile: { ruta: '/hero/mobile/', total: hero.mobile },
 };
-const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
+const primerFrame = (ruta: string) => `${ruta}frame_0001.${hero.extension}`;
 ---
 
 <section
@@ -17,6 +20,7 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
   data-total-desktop={FRAMES.desktop.total}
   data-ruta-mobile={FRAMES.mobile.ruta}
   data-total-mobile={FRAMES.mobile.total}
+  data-extension={hero.extension}
   aria-label="Presentación"
   class="relative h-[420vh]"
 >
@@ -163,6 +167,7 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { SecuenciaFrames } from '../lib/secuencia';
+  import { ruedaSuave } from '../lib/rueda-suave';
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -175,10 +180,25 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
   const ruta = esVertical ? hero.dataset.rutaMobile! : hero.dataset.rutaDesktop!;
   const total = Number(esVertical ? hero.dataset.totalMobile : hero.dataset.totalDesktop);
 
-  // ---------- Secuencia de frames (con fundido entre frames) ----------
-  // suavizado 0: el scrub de GSAP del timeline ya suaviza; dos suavizados encadenados se sienten "chiclosos"
-  const secuencia = new SecuenciaFrames(canvas, (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.webp`, total, undefined, { suavizado: 0 });
+  // ---------- Secuencia de frames ----------
+  // Misma receta que el recorrido de la ciudad: la imagen sigue al scroll directamente (sin el scrub del
+  // timeline) con el suavizado propio de SecuenciaFrames y fundido entre frames; la rueda del mouse avanza
+  // en pasos cortos y continuos (ruedaSuave).
+  const extension = hero.dataset.extension;
+  const secuencia = new SecuenciaFrames(canvas, (i) => `${ruta}frame_${String(i + 1).padStart(4, '0')}.${extension}`, total);
   secuencia.cargar(10, 6, () => (poster.style.opacity = '0'));
+  if (new URLSearchParams(location.search).has('fps')) (window as unknown as { secuenciaHero: SecuenciaFrames }).secuenciaHero = secuencia;
+
+  const disparadorImagen = ScrollTrigger.create({
+    trigger: hero,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: ({ progress }) => secuencia.dibujar(progress * (total - 1)),
+  });
+  ruedaSuave({
+    rango: () => ({ inicio: disparadorImagen.start, fin: disparadorImagen.end }),
+    alMover: () => ScrollTrigger.update(),
+  });
 
   // ---------- Texto y scroll ----------
   const beats = gsap.utils.toArray<HTMLElement>('[data-beat]', hero);
@@ -204,7 +224,6 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
   }
   gsap.set(beats.slice(1), { autoAlpha: 0 });
 
-  const estado = { frame: 0 };
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
@@ -219,8 +238,7 @@ const primerFrame = (ruta: string) => `${ruta}frame_0001.webp`;
     },
   });
 
-  tl.to(estado, { frame: total - 1, duration: 1, onUpdate: () => secuencia.dibujar(estado.frame) }, 0)
-    .fromTo('[data-hero-barra]', { scaleY: 0 }, { scaleY: 1, duration: 1 }, 0)
+  tl.fromTo('[data-hero-barra]', { scaleY: 0 }, { scaleY: 1, duration: 1 }, 0)
     .to('[data-hero-cue]', { autoAlpha: 0, duration: 0.04 }, 0.02)
     .to(beats[0], salida, 0.22);
   entradaLineas(tl, 1, 0.34);
